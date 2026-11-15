@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flame in Freefall – Uzay Yangını Laboratuvarı</title>
+<style>
+:root{--bg:#06080e;--panel:#0d1220;--panel2:#121a2c;--line:#222d47;--tx:#e8edf8;--mut:#8995b3;--acc:#ff9d3c;--acc2:#4cc9f0;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1{font-size:20px;margin:0}
+h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin:16px 0 8px}
+h2:first-child{margin-top:0}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.top p{margin:2px 0 0;color:var(--mut);font-size:12.5px}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:999px;padding:5px 11px;font-size:12px;cursor:pointer}
+.chip:hover{border-color:var(--acc)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr) 310px;gap:14px;padding:10px 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.col-center{display:flex;flex-direction:column;gap:14px;min-width:0}
+.stage{padding:10px}
+.statusbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.badge{padding:3px 10px;border-radius:999px;font-weight:600;font-size:12px;background:#243049}
+.badge.fire{background:#7a2a0c;color:#ffd7a8}.badge.out{background:#1c3a2c;color:#b9f5d0}.badge.warn{background:#5a4510;color:#ffe6a0}
+#msg{color:var(--mut);font-size:12.5px;flex:1;min-width:140px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button.b{background:var(--panel2);border:1px solid var(--line);color:var(--tx);padding:6px 11px;border-radius:9px;font-size:12.5px;cursor:pointer}
+button.b:hover{border-color:var(--acc2)}
+button.b.pri{background:#b4470c;border-color:#e0661e}
+button.b.sec{background:#0f3d52;border-color:#1d7ea3}
+canvas{display:block;width:100%;border-radius:10px}
+#cv{height:500px;background:#030509}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.charts canvas{height:130px;background:#080d18}
+.gas-chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.gas-chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.gas-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:#cbd5e1}
+.gas-leg-item{display:flex;align-items:center;gap:5px}
+.gas-leg-dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+#chGas{height:185px;background:#080d18;border:1px solid #1b2540}
+.gas-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.gpill{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:3px 8px;font-size:11.5px;font-variant-numeric:tabular-nums}
+.ctl{margin:0 0 11px}
+.ctl .row{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.ctl label{font-size:12.5px}
+.ctl input[type=number]{width:78px;background:#0a0f1b;border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:2px 5px;font-size:12.5px;text-align:right}
+.ctl input[type=range]{width:100%;accent-color:var(--acc);margin:3px 0 0}
+.ctl .unit{color:var(--mut);font-size:11.5px;margin-left:3px}
+.ctl .hint{color:var(--mut);font-size:11px}
+select{width:100%;background:#0a0f1b;border:1px solid var(--line);color:var(--tx);border-radius:7px;padding:5px;font-size:12.5px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:3.5px 0;border-bottom:1px dashed #1b2540;font-size:12.5px}
+.kv span:first-child{color:var(--mut)}
+.kv span:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.matsec{margin:0 16px 14px}
+.mattop{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mattop input{background:#0a0f1b;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 9px;font-size:13px;min-width:160px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:9px}
+.mc{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:9px 10px;cursor:pointer;position:relative}
+.mc:hover{border-color:#44557f}
+.mc.sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.mc .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;border:1px solid #0006}
+.mc b{font-size:13px}
+.mc .u{color:var(--mut);font-size:11.5px;margin:3px 0 5px;min-height:30px}
+.tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:10.5px;background:#0a0f1b;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#b9c4e2}
+.tag.tox{border-color:#7f1d1d;background:#2a1215;color:#fca5a5}
+.tw{overflow:auto;max-height:500px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{padding:5px 8px;border-bottom:1px solid #1b2540;text-align:right;white-space:nowrap}
+th{position:sticky;top:0;background:#101830;color:var(--acc2)}
+td:first-child,th:first-child,td:nth-child(2),th:nth-child(2),td:last-child,th:last-child{text-align:left}
+td:last-child{white-space:normal;min-width:220px}
+tr.sel td{background:#2a1c10}
+tbody tr{cursor:pointer}
+.note{color:var(--mut);font-size:11.5px;margin-top:8px}
+footer{padding:4px 16px 24px;color:var(--mut);font-size:11.5px}
+footer a{color:var(--acc2)}
+@media(max-width:1180px){.layout{grid-template-columns:290px minmax(0,1fr)}.col-stats{grid-column:1 / -1}}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.col-center{order:-1}.charts{grid-template-columns:1fr}#cv{height:380px}}
+
+.siTop{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+.siNum{font-size:40px;font-weight:800;font-variant-numeric:tabular-nums;min-width:72px;text-align:center;line-height:1}
+.siBar{height:9px;background:#05080f;border-radius:99px;overflow:hidden;margin-top:7px;width:100%}
+.siBar i{display:block;height:100%;width:0;border-radius:99px;transition:width .3s,background .3s}
+.ins{background:var(--panel2);border-left:3px solid var(--acc2);border-radius:0 10px 10px 0;padding:9px 12px;margin-bottom:9px}
+.ins h4{margin:0 0 3px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--acc2)}
+.ins p{margin:0;font-size:12.5px;line-height:1.5}
+.ins.hz{border-left-color:var(--bad);background:#2a1418}.ins.hz h4{color:#fca5a5}
+.ins.pr{border-left-color:var(--ok);background:#10261c}.ins.pr h4{color:#86efac}
+.expsec{margin:0 16px 14px}
+.exptabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.exptabs .chip.act{border-color:var(--acc);background:#3a2410}
+.expgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.expgrid canvas{height:240px;background:#080d18;border:1px solid var(--line);border-radius:10px}
+@media(max-width:900px){.expgrid{grid-template-columns:1fr}}
+
+.radar-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.radar-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.radar-grid{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:14px;align-items:stretch}
+#cvRadar{width:100%;height:320px;background:#04070e;border:1px solid #1d2842;border-radius:12px}
+.radar-side{display:flex;flex-direction:column;gap:8px;justify-content:space-between}
+.radar-zones{display:flex;flex-direction:column;gap:6px;max-height:245px;overflow-y:auto;padding-right:2px}
+.rzone{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:8px;padding:7px 9px;font-size:12px}
+.rzone-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;font-weight:600}
+.rzone-mats{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.rmat{font-size:10.5px;background:#090e1a;border:1px solid #263352;border-radius:5px;padding:1px 6px;color:#dbeafe;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.rmat:hover{border-color:var(--acc)}
+.rmat.active{border-color:var(--acc);background:#3a2210;color:#ffd7a8;font-weight:600}
+.rmat i{width:7px;height:7px;border-radius:50%;display:inline-block}
+@media(max-width:950px){.radar-grid{grid-template-columns:1fr}#cvRadar{height:290px}}
+
+
+/* ===== Sekmeler ===== */
+.tabs{position:sticky;top:0;z-index:50;display:flex;gap:6px;padding:8px 12px;background:#070b14ee;backdrop-filter:blur(6px);border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{flex:1 1 0;min-width:140px;background:var(--panel2);border:1px solid var(--line);color:var(--mut);padding:9px 12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--tx)}
+.tab.act{color:#fff;border-color:var(--acc);background:#3a2410}
+/* ===== Yangın güvenliği sekmesi ===== */
+.sf{max-width:980px;margin:0 auto;padding:14px 14px 40px}
+.sf-hero{margin-bottom:6px}
+.sf-hero h1{font-size:22px;line-height:1.25}
+.sf-hero p{color:#c3cce3;font-size:14px;line-height:1.6;margin:8px 0 0}
+.sf-sec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.sf-sec h2{margin-top:0}
+.sf-h3{font-size:12.5px;color:var(--acc2);letter-spacing:.04em;margin:16px 0 8px;text-transform:uppercase}
+.sf p{line-height:1.6;font-size:13.5px}
+.sf-note{color:var(--mut);font-size:12px!important;margin-top:10px}
+.sf-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.sf-stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.sf-stat b{display:block;font-size:22px;color:var(--acc);margin-bottom:4px}
+.sf-stat span{font-size:12px;color:#b8c3de;line-height:1.45}
+.sf-time{display:flex;flex-direction:column;gap:10px}
+.sf-ev{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:10px;padding:12px 14px}
+.sf-ev.bad{border-left-color:var(--bad)}
+.sf-ev h3{margin:2px 0 6px;font-size:15px}
+.sf-ev p{margin:6px 0}
+.sf-date{font-size:11.5px;color:var(--acc);font-weight:700;letter-spacing:.04em}
+.sf-lesson{background:#0a0f1b;border-radius:8px;padding:8px 10px}
+.sf-tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.sf-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.sf-table th,.sf-table td{padding:8px 10px;border-bottom:1px solid #1b2540;text-align:left;white-space:normal;vertical-align:top}
+.sf-table th{background:#101830;color:var(--acc2);position:static}
+.sf-table td:first-child{font-weight:600;white-space:nowrap}
+.sf-table tbody tr{cursor:default}
+.sf-range{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px}
+.sf-rrow{display:grid;grid-template-columns:90px 1fr;gap:10px;align-items:center;margin-bottom:8px;font-size:12.5px}
+.sf-track{position:relative;height:22px;background:#05080f;border-radius:6px}
+.sf-track i{position:absolute;top:0;bottom:0;border-radius:6px}
+.sf-track em{position:absolute;left:8px;top:3px;font-style:normal;font-size:11.5px;color:#fff;text-shadow:0 0 3px #000;font-weight:600;white-space:nowrap}
+.sf-rrow:nth-child(2) .sf-track em{left:calc(30% + 8px)}
+.sf-scale{display:flex;justify-content:space-between;margin-left:100px;font-size:10.5px;color:var(--mut)}
+.sf-exp{background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.sf-exp summary{cursor:pointer;padding:11px 14px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;list-style:none}
+.sf-exp summary::-webkit-details-marker{display:none}
+.sf-exp summary::before{content:"▸";color:var(--acc);margin-right:2px}
+.sf-exp[open] summary::before{content:"▾"}
+.sf-exp summary span{font-weight:700;font-size:14px}
+.sf-exp summary em{font-style:normal;color:var(--mut);font-size:12px}
+.sf-body{padding:2px 14px 14px}
+.sf-body ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6}
+.sf-body li{margin-bottom:4px}
+.sf-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:10px 0}
+.sf-kv div{background:#0a0f1b;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px}
+.sf-kv b{display:block;color:var(--acc2);margin-bottom:2px}
+.sf-kv span{color:#c3cce3}
+.sf-layers{display:flex;flex-direction:column;gap:10px}
+.sf-layer{display:flex;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px}
+.sf-layer .n{flex:0 0 28px;height:28px;border-radius:50%;background:#3a2410;border:1px solid var(--acc);color:var(--acc);display:flex;align-items:center;justify-content:center;font-weight:700}
+.sf-layer h3{margin:0 0 4px;font-size:14.5px}
+.sf-layer p{margin:0}
+.sf-refs ol{padding-left:20px;margin:0;font-size:12.5px;line-height:1.55;color:#c3cce3}
+.sf-refs li{margin-bottom:7px;word-break:break-word}
+.sf-refs a{color:var(--acc2)}
+
+.sf-q{background:#10261c;border:1px solid #1f4a35;border-left:4px solid var(--ok);border-radius:10px;padding:12px 14px;font-size:15px;font-weight:600;line-height:1.45}
+.sf-q span{display:block;font-size:10.5px;letter-spacing:.1em;color:#86efac;margin-bottom:4px}
+.sf-a{margin-top:12px}
+.sf-a p{margin:0 0 12px}
+.sf-thesis{background:var(--panel2);border-left:4px solid var(--acc);border-radius:0 10px 10px 0;padding:10px 12px}
+.sf-concl{background:#2a1c10;border:1px solid #5a3a1a;border-radius:10px;padding:10px 12px}
+.sf-ref{color:var(--acc2);font-size:11px;white-space:nowrap}
+/* ---------- OLLAMA sohbet alanı: mevcut simülatörden bağımsız ---------- */
+#ollamaChat{position:fixed;right:22px;bottom:20px;z-index:9999;font-family:inherit}
+#ollamaToggle{display:flex;align-items:center;gap:10px;border:1px solid #5b83ff;background:linear-gradient(135deg,#17264a,#10182e 60%,#291a3e);color:#f4f7ff;padding:12px 17px;border-radius:16px;cursor:pointer;box-shadow:0 8px 35px #0009,0 0 22px #527bff35;font-weight:750;letter-spacing:.02em;transition:.2s}
+#ollamaToggle:hover{transform:translateY(-2px);box-shadow:0 10px 38px #000b,0 0 28px #6c8dff66}
+#ollamaToggle .orb{width:11px;height:11px;border-radius:50%;background:#75f0c2;box-shadow:0 0 12px #75f0c2;display:inline-block}
+#ollamaPanel{display:none;position:absolute;right:0;bottom:66px;width:min(390px,calc(100vw - 28px));height:min(590px,calc(100vh - 115px));min-height:390px;background:linear-gradient(155deg,#101a31f5,#080d19f7 70%);border:1px solid #344a79;border-radius:20px;box-shadow:0 20px 70px #000c,0 0 35px #426cff24;overflow:hidden;backdrop-filter:blur(18px)}
+#ollamaPanel.open{display:flex;flex-direction:column;animation:ollamaIn .22s ease-out}
+@keyframes ollamaIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+#ollamaHead{padding:15px 16px 12px;background:linear-gradient(100deg,#1a2d52,#17172f);border-bottom:1px solid #2a3a60;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#ollamaHead strong{font-size:14px;letter-spacing:.04em}
+#ollamaHead small{display:block;color:#91a5ce;font-size:11px;margin-top:2px}
+#ollamaClose{border:1px solid #3a4c70;background:#1a2540;color:#dce7ff;border-radius:9px;width:31px;height:31px;cursor:pointer;font-size:17px}
+#ollamaStatus{padding:7px 14px;color:#91a5ce;font-size:11px;border-bottom:1px solid #1c2943}
+#ollamaStatus:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#fbbf24;margin-right:7px}
+#ollamaStatus.ready:before{background:#75f0c2;box-shadow:0 0 8px #75f0c2}
+#ollamaMessages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:11px;scroll-behavior:smooth}
+.ollamaMsg{max-width:88%;padding:10px 12px;border-radius:13px;font-size:12.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.ollamaMsg.user{align-self:flex-end;background:linear-gradient(135deg,#3156a1,#493b83);border:1px solid #6382d0;color:#fff;border-bottom-right-radius:4px}
+.ollamaMsg.bot{align-self:flex-start;background:#17233a;border:1px solid #2c3d60;color:#e4ebfa;border-bottom-left-radius:4px}
+.ollamaMsg.error{border-color:#8a3c4b;color:#ffc4cc}
+#ollamaComposer{padding:12px;border-top:1px solid #263653;background:#0c1425}
+#ollamaInput{width:100%;resize:none;min-height:62px;max-height:120px;background:#080e1b;border:1px solid #304366;border-radius:12px;color:#f1f5ff;padding:10px 11px;font:12.5px/1.5 inherit;outline:none}
+#ollamaInput:focus{border-color:#6c8dff;box-shadow:0 0 0 2px #6c8dff20}
+#ollamaActions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+#ollamaActions span{font-size:10px;color:#8293b6}
+#ollamaSend{border:1px solid #6485ed;background:linear-gradient(110deg,#3159ad,#6547a0);color:white;border-radius:10px;padding:8px 15px;font-weight:700;cursor:pointer}
+#ollamaSend:disabled{opacity:.5;cursor:wait}
+@media(max-width:520px){#ollamaChat{right:12px;bottom:12px}#ollamaPanel{right:-2px;bottom:62px;height:min(560px,calc(100vh - 90px))}}
+</style>
+</head>
+<body>
+<nav class="tabs"><button class="tab act" data-tab="sim">🔥 Simülasyon</button><button class="tab" data-tab="safety">🛡️ Yangın Güvenliği &amp; NASA Deneyleri</button></nav>
+<div id="viewSim">
+<header class="top">
+  <div>
+    <h1>🔥 Flame in Freefall · Uzay Yangını Laboratuvarı</h1>
+    <p>Küçük kare katı yakıt parçasının mikro-yerçekimi ve uzay aracı atmosferlerinde yanması · piroliz gaz emisyonu ve yarı-ampirik yanma modeli</p>
+  </div>
+  <div class="presets" id="presets"></div>
+</header>
+
+<main class="layout">
+  <section class="card" id="controls"></section>
+
+  <section class="col-center">
+    <div class="card stage">
+      <div class="statusbar">
+        <span id="badge" class="badge">Hazır</span>
+        <span id="msg"></span>
+        <div class="btns">
+          <button class="b pri" id="bIgnite">🔥 Tutuştur / Sıfırla</button>
+          <button class="b" id="bPause">⏸ Duraklat</button>
+          <button class="b sec" id="bVent">💨 Rüzgârı kes</button>
+          <button class="b sec" id="bCO2">🧯 CO₂ söndürücü</button>
+          <button class="b sec" id="bVac">🕳 Tahliye</button>
+        </div>
+      </div>
+      <canvas id="cv"></canvas>
+    </div>
+
+    <div class="card charts">
+      <canvas id="ch1"></canvas>
+      <canvas id="ch2"></canvas>
+    </div>
+
+    <!-- YENİ: Malzemeye Özgü Çoklu Gaz Emisyon Grafiği -->
+    <div class="gas-chart-wrap">
+      <div class="gas-chart-head">
+        <h2 style="margin:0">🧪 Yanma &amp; Piroliz Gaz Emisyon Profili (Canlı Kabin Konsantrasyonu)</h2>
+        <div class="gas-legend" id="gasLegend"></div>
+      </div>
+      <canvas id="chGas"></canvas>
+      <div class="gas-pills" id="gasPills"></div>
+      <div class="note" id="gasNote">Seçili malzemenin yanma/piroliz sırasında açığa çıkardığı başlıca gazların (CO, CO₂, HCN, HCl, HF, NOx, SO₂, CH₄/UOB) kabin hacmi içindeki anlık birikimi (ppm) ve g/kg verimleri.</div>
+    </div>
+
+    
+    <!-- YENİ: Termal Yayılım & Tutuşma Zonu Radarı -->
+    <div class="radar-wrap">
+      <div class="radar-head">
+        <h2 style="margin:0">📡 Termal Yayılım &amp; Malzeme Tutuşma Kesitleri (Kanal Profili)</h2>
+        <span class="badge" id="radarRangeBadge" style="background:#16223b;color:#93c5fd">Dikey Kanal Kesiti</span>
+      </div>
+      <div class="radar-grid">
+        <canvas id="cvRadar"></canvas>
+        <div class="radar-side">
+          <div class="radar-zones" id="radarZones"></div>
+          <div class="note" id="radarNote" style="margin-top:0">
+            Gönderdiğiniz görseldeki prensibe benzer şekilde; yanan maddeden yukarı doğru yayılan sıcaklık profili ve malzemelerin <b>tutuşma sıcaklığına ($T_{ig}$)</b> göre dikey kanal üzerindeki kesit arkları gösterilmektedir.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="si">
+      <h2>🤖 SI Güvenlik Analizi (canlı)</h2>
+      <div class="siTop">
+        <div class="siNum" id="siNum">0</div>
+        <div style="flex:1"><span id="siLvl" class="badge">—</span><div class="siBar"><i id="siBarF"></i></div>
+        <div class="note" style="margin-top:4px">SI risk skoru 0–100 · seçili malzeme ve ortam koşulları için model tahmini</div></div>
+      </div>
+      <div class="ins"><h4>Durum analizi</h4><p id="siText"></p></div>
+      <div class="ins"><h4>1 g (Dünya) ↔ µg (uzay) farkı</h4><p id="siDiff"></p></div>
+      <div class="ins hz"><h4>Piroliz &amp; toksik gaz verimleri (g/kg)</h4><p id="siTox"></p></div>
+      <div class="ins pr"><h4>Önerilen müdahale</h4><p id="siProto"></p></div>
+    </div>
+  </section>
+
+  <section class="card col-stats" id="stats"></section>
+</main>
+
+<section class="card matsec">
+  <div class="mattop">
+    <h2 style="margin:0">Uzay aracı yanıcı malzemeleri &amp; gaz verimleri <span id="matcount" style="color:var(--mut)"></span></h2>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <input id="search" placeholder="Malzeme veya gaz ara (ör. HCN, HF, HCl)…">
+      <button class="b" id="bView">Tablo görünümü</button>
+    </div>
+  </div>
+  <div id="matcards" class="grid"></div>
+  <div id="mattable" class="tw" style="display:none"></div>
+  <p class="note">Malzeme değerleri (LOI, yanma ısısı, gazlaşma ısısı, kurum/CO/CO₂ ve toksik gaz verimleri [g/kg]) SFPE Handbook (Tewarson tabloları), NIST ve NASA WSTF literatüründeki tipik aralıklardan alınmış yaklaşık değerlerdir; havalandırma oranına (φ) ve sıcaklığa göre değişir. “Referans yayılma hızı” bir model parametresidir.</p>
+</section>
+
+<section class="card expsec">
+  <div class="mattop"><h2 style="margin:0">🛰️ Gerçek NASA mikro-yerçekimi yanma deneyleri</h2></div>
+  <div class="exptabs" id="exptabs"></div>
+  <div id="expdesc" style="font-size:13px"></div>
+  <div class="expgrid"><canvas id="expc1"></canvas><canvas id="expc2"></canvas></div>
+  <div class="ins pr"><h4>Görev güvenliği çıkarımı</h4><p id="exptake"></p></div>
+  <p class="note">Deney adları, platformlar ve ana bulgular gerçek NASA programlarına dayanır; grafikteki zaman serileri ve 1g/µg karşılaştırma yüzdeleri <b>örnekleyici/yaklaşık</b> değerlerdir, ham ölçüm verisi değildir.</p>
+</section>
+
+<!-- Ollama ile sohbet: simülatörün mevcut bölümlerine dokunmadan eklendi -->
+<div id="ollamaChat">
+  <section id="ollamaPanel" aria-label="Ollama yapay zekâ sohbeti">
+    <div id="ollamaHead">
+      <div><strong>✦ OLLAMA / AI LAB</strong><small>Qwen 2.5 · 7B · Yerel yapay zekâ</small></div>
+      <button id="ollamaClose" title="Kapat" aria-label="Sohbeti kapat">×</button>
+    </div>
+    <div id="ollamaStatus">Ollama bağlantısı bekleniyor…</div>
+    <div id="ollamaMessages">
+      <div class="ollamaMsg bot">Merhaba! Ben Qwen 2.5. Bu laboratuvar ve uzay yangınları hakkında benimle konuşabilirsin. 🚀</div>
+    </div>
+    <div id="ollamaComposer">
+      <textarea id="ollamaInput" placeholder="Mesajını yaz… (Enter: gönder, Shift+Enter: yeni satır)" aria-label="Mesajın"></textarea>
+      <div id="ollamaActions"><span>Mesajların bilgisayarında, yerel modelde işlenir.</span><button id="ollamaSend">Gönder ↗</button></div>
+    </div>
+  </section>
+  <button id="ollamaToggle"><i class="orb"></i><span>QWEN AI İLE KONUŞ</span><span>✦</span></button>
+</div>
+
+<footer>
+  <b>Model hakkında:</b> Eğitim/prototip amaçlı indirgenmiş bir modeldir; gerçek malzeme sertifikasyonunun (NASA-STD-6001) yerine geçmez. Alev boyutu yakıt kütle akısından hesaplanır: durgun mikro-g ortamında oksijen yalnızca difüzyonla geldiği için alev yakıtı saran küresel bir kabuk olur (yarıçap ≈ stokiyometrik oksijen akışı / 4π·ρD·Y<sub>O₂</sub>); hava akışı veya yerçekimi konveksiyonu arttıkça alev damla biçimine uzar. Gaz emisyonları, yakıt tüketim hızı (ṁ) ile malzeme bazlı ampirik verim katsayılarının (g/kg) çarpımı ve kabin hacmi (V) üzerinden ideal karışım varsayımıyla ppm cinsinden izlenir.<br>
+  Kaynaklar:
+  <a href="https://ntrs.nasa.gov/api/citations/20110008636/downloads/20110008636.pdf" target="_blank" rel="noopener">NASA WSTF – Parametrik etkiler (Hirsch vd.)</a> ·
+  <a href="https://ntrs.nasa.gov/api/citations/20200000557/downloads/20200000557.pdf" target="_blank" rel="noopener">Düşük basınçta eşzamanlı yayılma, Saffire II karşılaştırması</a> ·
+  <a href="https://www.nasa.gov/centers-and-facilities/white-sands/flammability" target="_blank" rel="noopener">NASA White Sands – Yanabilirlik testleri</a> ·
+  <a href="https://ntrs.nasa.gov/api/citations/20240005117/downloads/ICES-2024-128-Final%20Manuscript-No%20Tracked%20Changes.pdf" target="_blank" rel="noopener">Keşif atmosferi (ICES 2024)</a> ·
+  <a href="https://ntrs.nasa.gov/api/citations/20210022143/downloads/Fire%20detection%20white%20paper%20final%20211031.pdf" target="_blank" rel="noopener">Uzay aracı yangın algılama (NASA)</a>
+</footer>
+</div>
+<div id="viewSafety" style="display:none">
+<div class="sf">
+
+  <section class="sf-hero">
+    <h1>🛡️ Uzay Yangın Güvenliği &amp; NASA Deney Analizleri</h1>
+    <p>Uzayda yangın, mürettebatın karşılaşabileceği en tehlikeli durumlardan biridir: kaçacak yer yok, hacim çok küçük ve çıkış seçenekleri sınırlı. Bu sayfa, geçmiş yangın olaylarını, mikro-yerçekiminde alevin neden farklı davrandığını ve NASA'nın yörüngede yaptığı gerçek deneylerin ana bulgularını sade biçimde özetler.</p>
+  </section>
+
+  <section class="sf-sec">
+    <h2>Bir bakışta rakamlar</h2>
+    <div class="sf-stats">
+      <div class="sf-stat"><b>≥ 7</b><span>1967–1997 arasında kayıtlı uzay aracı/istasyon yangın olayı</span></div>
+      <div class="sf-stat"><b>3</b><span>Apollo 1 yangınında hayatını kaybeden astronot (27 Ocak 1967)</span></div>
+      <div class="sf-stat"><b>6</b><span>Saffire uçuşu: I–III (2016–2017), IV–V (2020–2021), VI (Aralık 2023)</span></div>
+      <div class="sf-stat"><b>6</b><span>ACME projesi kapsamında ISS'te yapılan gaz yakıtlı alev deneyi (2017'den itibaren)</span></div>
+      <div class="sf-stat"><b>25 → 15 cm</b><span>Saffire kanal yarı-yüksekliği: I–III'te 25 cm, IV–VI'da 15 cm</span></div>
+      <div class="sf-stat"><b>500–800 K</b><span>"Soğuk alev" sıcaklığı; normal alev 1500–2000 K</span></div>
+    </div>
+  </section>
+
+  <section class="sf-sec">
+    <h2>Tarihten dersler: gerçek yangın olayları</h2>
+    <div class="sf-time">
+      <div class="sf-ev bad">
+        <div class="sf-date">27 Ocak 1967</div>
+        <h3>Apollo 1 (yerde, test sırasında)</h3>
+        <p>Fırlatma provası sırasında elektrik kısa devresi, komuta modülünün saf oksijen ortamında yangın başlattı. Gus Grissom, Ed White ve Roger Chaffee hayatını kaybetti. Saf oksijen, yanıcı malzemeler, kötü tasarlanmış kapak ve acil durum hazırlığı eksikliği birlikte felakete yol açtı.</p>
+        <p class="sf-lesson"><b>Ders:</b> Kapsamlı yeniden tasarım ve yeni yangın güvenliği protokolleri getirildi; sonraki görevlerde acil çıkış kapağı eklendi ve yer testlerinde oksijeni seyrelten bir sistem kuruldu. Mürettebatın kapaktan çıkması yaklaşık 90 saniye sürecekti.</p>
+      </div>
+      <div class="sf-ev warn">
+        <div class="sf-date">1994</div>
+        <h3>Mir istasyonu – ilk yangın</h3>
+        <p>Mir istasyonu 1994'te de bir yangın yaşadı; 1997'deki olay ise çok daha ciddiydi.</p>
+      </div>
+      <div class="sf-ev bad">
+        <div class="sf-date">23–24 Şubat 1997</div>
+        <h3>Mir – oksijen kandili yangını</h3>
+        <p>Ek mürettebat için kullanılan katı kimyasal oksijen üreteçlerinden (lityum perklorat "kandil") biri değiştirilirken tutuştu ve bir "üfleç" gibi alev püskürttü. Altı kişilik mürettebat üç yangın söndürücüyle mücadele etti; yoğun duman nedeniyle maske kullandı. Çevredeki donanım hasar gördü.</p>
+        <p class="sf-lesson"><b>Olası neden:</b> Üretecin içine sıkışan bir eldiven parçası; sonraki deneyler bunun benzer bir yangını başlatabildiğini gösterdi.<br><b>Süre tartışması:</b> İlk resmi raporlar yaklaşık 90 saniye derken, mürettebattan Jerry Linenger'ın anlatımı ve başka kaynaklar yaklaşık 15 dakikaya işaret eder. Bu yüzden süre için tek bir kesin değer vermiyoruz.</p>
+      </div>
+    </div>
+    <p class="sf-note">NASA'nın risk analizleri, ISS ömrü boyunca en az iki yangın olabileceğini öngörmüştü. Bu tahmin, yangın güvenliği araştırmalarının en büyük gerekçelerinden biridir.</p>
+  </section>
+
+  <section class="sf-sec">
+    <h2>Mikro-yerçekiminde yangın neden farklı?</h2>
+    <div class="sf-tw">
+      <table class="sf-table">
+        <thead><tr><th>Özellik</th><th>Yer (1g)</th><th>Mikro-yerçekimi (µg)</th></tr></thead>
+        <tbody>
+          <tr><td>Alev şekli</td><td>Gözyaşı/mum alevi; sıcak gaz yükselir</td><td>Küresel ve daha sade yapılı; yükselen akış yok</td></tr>
+          <tr><td>Oksijen taşınımı</td><td>Doğal konveksiyon taze hava getirir</td><td>Hava akışı olmazsa yalnızca yayılım; fan/havalandırma akışı belirleyici</td></tr>
+          <tr><td>Yanma sınırı</td><td>Daha yüksek oksijen gerekir</td><td>Bazı koşullarda yaklaşık %2–3 daha düşük oksijende yanabilir</td></tr>
+          <tr><td>Alev yayılımı</td><td>Saffire'da görülen sabit hızlı yayılım gözlenmez</td><td>Eşyönlü (concurrent) akışta sabit hızda yayılım mümkün</td></tr>
+          <tr><td>Kurum (is)</td><td>Alevden hızla çıkar</td><td>Alev içinde daha uzun kalır, kurum kümeleri daha büyür</td></tr>
+          <tr><td>Soğuk alevler</td><td>Çabuk söner</td><td>Dakikalarca yanabilir ve görünmeyebilir</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ins" style="margin-top:12px"><h4>Neden önemli?</h4><p>Yer üstü yangın güvenliği anlayışı 1g'ye dayanır. Alev şekli, duman davranışı ve söndürücü etkisi mikro-yerçekiminde değiştiği için, tasarımcılar uzun süre gerçek veriden yoksun kalmıştı. Saffire bu boşluğu doldurmak için tasarlandı.</p></div>
+
+    <h3 class="sf-h3">Sıcaklık karşılaştırması (FLEX deneyi)</h3>
+    <div class="sf-range">
+      <div class="sf-rrow"><span>Soğuk alev</span><div class="sf-track"><i style="left:0;width:15%;background:#38bdf8"></i><em>500–800 K</em></div></div>
+      <div class="sf-rrow"><span>Normal alev</span><div class="sf-track"><i style="left:30%;width:25%;background:#fb923c"></i><em>1500–2000 K</em></div></div>
+      <div class="sf-scale"><span>0</span><span>500</span><span>1000</span><span>1500</span><span>2000 K</span></div>
+    </div>
+    <p class="sf-note">Soğuk alevler karbon monoksit ve formaldehit üretir; normal alevler ise kurum, CO₂ ve su üretir. Bu yüzden "görünür alev söndü" demek, yanmanın bittiği anlamına gelmeyebilir.</p>
+  </section>
+
+  <section class="sf-sec">
+    <h2>NASA deneyleri ve ana bulgular</h2>
+
+    <details class="sf-exp" open>
+      <summary><span>Saffire I–III</span><em>2016–2017 · Cygnus (insansız)</em></summary>
+      <div class="sf-body">
+        <p>İlk kez, yörüngedeki bir uzay aracının içinde bilerek büyük ölçekli bir yangın çıkarıldı. Deneyler, ISS'e yük taşıyan ve görevini bitirip yeniden girişe hazırlanan insansız Cygnus araçlarında yapıldı; böylece mürettebat riske girmedi.</p>
+        <div class="sf-kv">
+          <div><b>Saffire-I</b><span>~400 s yanma · numune genişliği 40 cm · akış ~20 cm/s</span></div>
+          <div><b>Saffire-II</b><span>Daha dar numuneler (5 cm), birden çok malzeme</span></div>
+          <div><b>Saffire-III</b><span>~320 s yanma · planlanan akış ~30 cm/s</span></div>
+        </div>
+        <ul>
+          <li>İnce, kömürleşen kumaş üzerinde yer çekimindekinin aksine <b>sabit hızlı alev yayılımı</b> mümkün olduğu gösterildi.</li>
+          <li>Alev davranışı <b>deney ölçeğine</b> bağlı çıktı; bu yüzden küçük laboratuvar testleri tek başına yeterli sayılmaz.</li>
+          <li>Sonuçlar, NASA-STD-6001 Test 1 yanabilirlik koşullarını ve yangın güvenliği stratejisini doğrudan ilgilendirir.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="sf-exp">
+      <summary><span>Saffire IV–V</span><em>Mayıs 2020 (NG-13) · Ocak 2021 (NG-14)</em></summary>
+      <div class="sf-body">
+        <p>Hedef yalnızca alev yayılımı değil; yangının <b>aracın kendisine etkisi</b>ydi. Kanal yarı-yüksekliği 25 cm'den 15 cm'ye düşürüldü, yan kameralar ve giriş/çıkış gaz sensörleri eklendi (oksijen tüketimi ve karbon gazı üretimi ölçümü).</p>
+        <div class="sf-kv">
+          <div><b>IV-1</b><span>SIBAL kumaş · 50 cm · 20 cm/s</span></div>
+          <div><b>V-2</b><span>Pamuk jarse · 50 cm · 20 cm/s</span></div>
+        </div>
+        <ul>
+          <li>Numune boyutu ve kanal yüksekliğinin, alev yayılım hızını ve piroliz uzunluğunu etkilediği görüldü.</li>
+          <li>Asit gazlarının (HCl ve HF) uzay aracı içinde taşınımı ve bir <b>yangın sonrası temizlik sistemi</b> test edildi.</li>
+          <li>Yangının aracı ölçülebilir biçimde etkilediği; sonuçların modelleri doğrulamak için kullanılacağı belirtildi.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="sf-exp">
+      <summary><span>Saffire VI</span><em>Aralık 2023 · kalın yakıtlar &amp; uzun yanma</em></summary>
+      <div class="sf-body">
+        <p>Son Saffire uçuşunda kalın malzemeler, daha uzun yanma süreleri ve keşif atmosferleri hedeflendi. Duman dedektörü ve parçacık ölçümleriyle yangının uzak alandaki etkisi de izlendi.</p>
+        <div class="sf-tw">
+          <table class="sf-table">
+            <thead><tr><th>Test</th><th>Malzeme</th><th>Uzunluk</th><th>Akış</th></tr></thead>
+            <tbody>
+              <tr><td>VI-2</td><td>SIBAL kumaş</td><td>50 cm</td><td>20 cm/s</td></tr>
+              <tr><td>VI-3</td><td>İki yüzü yanan PMMA</td><td>18 cm</td><td>20 cm/s</td></tr>
+              <tr><td>VI-4</td><td>Tek yüzü yanan PMMA</td><td>18 cm</td><td>20 cm/s</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>VI-3'te akış 1120. saniyede 20 → 5 cm/s'ye düşürüldü, 1420. saniyede tamamen kesildi.</li>
+          <li>Önceki uçuşlardan çıkan genel sonuç: tipik uzay aracı koşullarında yangınlar anlamlı boyuta ulaşabilir, ancak <b>ortalama sıcaklık ve basınç artışı</b> özellikle endişe verici değildir. Saffire VI'nın hedeflerinden biri, ısı/basınç etkisini <b>zehirli yanma ürünleri</b>nin etkisiyle karşılaştırmaktı.</li>
+        </ul>
+        <p class="sf-note">PMMA gibi malzemeler Simülasyon sekmesinde de yer alır.</p>
+      </div>
+    </details>
+
+    <details class="sf-exp">
+      <summary><span>FLEX</span><em>ISS · Combustion Integrated Rack</em></summary>
+      <div class="sf-body">
+        <p>Damlacık yanması ve söndürücü etkinliğini inceleyen deney. Heptan damlacıkları ISS'te küresel alevle yandı.</p>
+        <ul>
+          <li>Görünür sıcak alev yok olduktan sonra damlacığın <b>soğuk alevle</b> yanmaya devam ettiği keşfedildi (2012).</li>
+          <li>Soğuk alevler yerde de üretilebilir ama çabuk söner; ISS'te dakikalarca yanabildi.</li>
+          <li>Güvenlik çıkarımı: söndürücü ve duman algılama, görünür alev kaybından sonraki yanmayı hesaba katmalı.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="sf-exp">
+      <summary><span>ACME</span><em>2017–2022 · gaz yakıtlı alevler</em></summary>
+      <div class="sf-body">
+        <p>Altı bağımsız deneyle gaz yakıtlı alevler incelendi. Ana odak enerji ve çevre olsa da, yangın güvenliği için de ikincil bir değeri var.</p>
+        <ul>
+          <li>CFI-G deneyi, yerde özel koşullar gerektiren yakıt gazı <b>soğuk alevlerini</b> katkı maddesi olmadan üretti.</li>
+          <li>Kurum kümeleri mikro-yerçekiminde alev içinde daha uzun kaldığı için daha büyük oluştu.</li>
+          <li>Yaklaşık dört buçuk yıl süren yörünge operasyonunu yaklaşık 50 kişilik bir ekip destekledi.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="sf-exp">
+      <summary><span>BASS-II &amp; SoFIE</span><em>Katı yakıtlar · ISS</em></summary>
+      <div class="sf-body">
+        <p>BASS-II, katı malzemelerin mikro-yerçekiminde yer çekimine göre ne kadar iyi yandığını ve alev yayılımı ile yakıt gerilemesini karşılaştırdı. SoFIE (2022'de ISS'e gönderildi), yakıt sıcaklığının malzeme yanabilirliğini nasıl değiştirdiğini inceler.</p>
+        <ul>
+          <li>Yanabilirlik testlerinin, yalnızca yer çekimiyle yapılması yeterli değildir.</li>
+          <li>SoFIE-GEL, yakıtın sıcaklığının malzeme yanabilirliğini nasıl etkilediğini inceler.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <section class="sf-sec">
+    <h2>Yangın güvenliği stratejisi: dört katman</h2>
+    <div class="sf-layers">
+      <div class="sf-layer"><span class="n">1</span><div><h3>Önleme</h3><p>Malzemeler NASA-STD-6001 gibi yanabilirlik testlerinden geçer. Kullanılan malzemelerin alev yayma eğilimi ve zehirli gaz verimi önceden değerlendirilir. Mir olayı, oksijen üreteci gibi "yangın kaynağı olabilecek" ekipmanın da risk analizine girmesi gerektiğini gösterdi.</p></div></div>
+      <div class="sf-layer"><span class="n">2</span><div><h3>Algılama</h3><p>Duman ve parçacık dedektörleri erken uyarı verir. Saffire VI, iyonizasyon tipi uzak alan dedektörü ve parçacık ölçümleriyle gerçekçi yangınlarda bu sistemlerin davranışını inceledi.</p></div></div>
+      <div class="sf-layer"><span class="n">3</span><div><h3>Müdahale</h3><p>ISS'in ABD bölümünde, kaynağa göre 13 adet yangın söndürücü bulunur. Su sisi (water mist) gibi daha modern yöntemler üzerinde çalışılmaktadır. Kabini vakumla boşaltmak her zaman çözüm değildir; çünkü Li-ion piller atmosferik oksijen olmadan da yanabilir.</p></div></div>
+      <div class="sf-layer"><span class="n">4</span><div><h3>Temizlik &amp; kurtarma</h3><p>Yangın bittikten sonra hava hâlâ HCl, HF, CO gibi gazlar içerebilir. Maskeler, hava filtrasyonu ve temizlik sistemleri bu yüzden gereklidir; Saffire IV–V bu aşamayı da test etti.</p></div></div>
+    </div>
+  </section>
+
+  <section class="sf-sec">
+    <h2>Simülatörle bağlantı</h2>
+    <div class="ins pr"><h4>Simülasyon sekmesinde ne görüyorsunuz?</h4><p>Simülasyon sekmesindeki model, burada anlatılan olguları sadeleştirilmiş biçimde yansıtır: mikro-yerçekiminde küresel alev, düşük akışta oksijen sınırlaması ve malzemeye göre zehirli gaz verimleri. Model eğitim amaçlıdır ve gerçek malzeme sertifikasyonunun yerini tutmaz.</p></div>
+  </section>
+
+  <section class="sf-sec sf-qa">
+    <h2>Soru &amp; Cevap</h2>
+    <div class="sf-q"><span>SORU</span>Mikro-yerçekimli ortamlarda yangınlara nasıl çözüm buluruz ve nasıl önleriz?</div>
+    <div class="sf-a">
+      <p class="sf-thesis"><b>Tez:</b> Mikro-yerçekiminde yangını tek bir teknolojiyle tamamen ortadan kaldırmak gerçekçi değildir. Ulaşılabilir çözüm, birbirini tamamlayan katmanların (önleme, erken algılama, kontrollü müdahale, yangın sonrası kurtarma) birlikte çalışmasıdır ve her katman gerçek yörünge verisiyle doğrulanmalıdır.</p>
+      <p><b>1. Önce yangını başlatabilecek koşulları azaltmak.</b> Apollo 1'de saf oksijen ortamı ve yanıcı malzemeler, Mir'de ise bir oksijen üretecinin tutuşması felaketin zeminini hazırladı <span class="sf-ref">[12, 15, 16]</span>. Bu yüzden ilk savunma hattı, kabin malzemelerinin NASA-STD-6001 Test 1 gibi yanabilirlik testlerinden geçmesi, ısı ve kıvılcım üretebilecek ekipmanın (elektrik düzeneği, batarya, oksijen üreteci) risk analizine alınması ve kabin oksijen oranının fizyolojik olarak mümkün olan en düşük seviyede tutulmasıdır. Ancak kesin bir uyarı gerekir: ay ve Mars görevleri için düşünülen düşük basınçlı, oksijence zengin atmosferler yanabilirliği artırabilir; Saffire IV–VI'nın hedeflerinden biri tam da bu "keşif atmosferleri"ndeki yangın büyümesini ölçmekti <span class="sf-ref">[3, 4, 5]</span>.</p>
+      <p><b>2. Yer testlerinin yetmediğini kabul etmek.</b> Mikro-yerçekiminde alev şekli, kurum davranışı ve yanma sınırı değişir; bazı koşullarda alev yerdekinden yaklaşık %2–3 daha düşük oksijende de yanabilir <span class="sf-ref">[14]</span>. Saffire, alev davranışının deney ölçeğine ve hava akışına güçlü biçimde bağlı olduğunu gösterdi <span class="sf-ref">[2, 4]</span>. Sonuç: malzeme seçimi ve yangın modelleri küçük 1g testlerine değil, mümkün olduğunca gerçek ölçekli ve gerçek akış koşullu verilere dayanmalıdır. NASA'nın Saffire verisini modelleri doğrulamak için kullanması bu yüzdendir <span class="sf-ref">[1, 4]</span>.</p>
+      <p><b>3. Erken algılama.</b> Yangının büyüme hızı; ne kadar çabuk fark edileceğini, ne kadar söndürücü gerekeceğini ve yangının ne kadar zarar vereceğini belirler <span class="sf-ref">[5]</span>. Mir deneyiminde daha etkili uyarı sistemlerinin saniyeler kazandırabileceği vurgulandı <span class="sf-ref">[11]</span>. Saffire VI, uzak alan iyonizasyon duman dedektörü ve parçacık ölçümleriyle algılama sistemlerinin gerçek yangında nasıl davrandığını inceledi <span class="sf-ref">[5]</span>. Kurumun mikro-yerçekiminde alev içinde daha uzun kalması ve daha büyük kümeler oluşturması <span class="sf-ref">[8]</span> dedektör tasarımında yerdeki duman davranışının doğrudan kopyalanamayacağı anlamına gelir.</p>
+      <p><b>4. Alevi besleyen akışı kontrol etmek.</b> Mikro-yerçekiminde doğal konveksiyon yoktur; oksijeni alevin yanına çoğunlukla havalandırma getirir. Saffire deneylerinde alev yayılımı akış hızına duyarlı çıktı ve Saffire VI-3'te akış önce 20'den 5 cm/s'ye düşürülüp sonra tamamen kesildi <span class="sf-ref">[5]</span>. Bu nedenle bir yangın anında etkilenen bölümde havalandırmanın kısılması veya durdurulması mantıklı bir müdahale adımıdır. Yine de bunun yangını tek başına söndürmeyeceğini, özellikle kendi oksijenini üreten sistemlerde (Mir'deki oksijen kandili gibi) yetmeyeceğini unutmamak gerekir <span class="sf-ref">[12]</span>.</p>
+      <p><b>5. Söndürme: "görünen alev söndü" demek yeterli değil.</b> ISS'in ABD bölümünde, kaynağa göre, 13 adet söndürücü bulunur ve su sisi gibi daha modern yöntemler üzerinde çalışılır <span class="sf-ref">[11, 14]</span>. FLEX deneyi, görünür alev kaybolduktan sonra bile soğuk alevle (yaklaşık 500–800 K) yanmanın sürebildiğini ve bunun karbon monoksit ile formaldehit ürettiğini gösterdi <span class="sf-ref">[6, 8, 13]</span>. Pratik sonuç: söndürme sonrası bölgenin sıcaklık ve gaz ölçümleriyle izlenmesi gerekir. Ayrıca kabini dışarı boşaltmak güvenilir bir çözüm değildir; Li-ion piller atmosferik oksijen olmadan da yanabilir <span class="sf-ref">[14]</span>.</p>
+      <p><b>6. Asıl tehlike çoğu zaman ısı değil, duman ve zehirli gazlardır.</b> Saffire ön sonuçları, ortalama sıcaklık ve basınç artışının özellikle endişe verici olmadığını gösterdi <span class="sf-ref">[5]</span>. Saffire IV–V ise HCl ve HF gibi asit gazlarının araç içinde taşınımını ve yangın sonrası temizlik sistemini ölçtü <span class="sf-ref">[4]</span>. Bu yüzden yangın sonrası kurtarma (maskeler, hava filtrasyonu, gaz izleme, Spacecraft Maximum Allowed Concentration, yani SMAC sınırlarına göre değerlendirme) çözümün zorunlu bir parçasıdır, ek bir özellik değil.</p>
+      <p><b>7. İnsan ve prosedür.</b> Apollo 1 örneğinde mürettebatın kapağı açması yaklaşık 90 saniye sürecekti <span class="sf-ref">[15]</span>; Mir'de ise mürettebat yoğun dumanda maske takarak üç söndürücüyle mücadele etti <span class="sf-ref">[12]</span>. Tatbikat, net rol dağılımı ve yer kontrolüyle koordinasyon, donanımdan bağımsız olarak hayatta kalma şansını belirler <span class="sf-ref">[11]</span>.</p>
+      <p><b>8. Hâlâ bilinmeyenler.</b> Ay ve Mars'ın kısmi yerçekimi, uzun süreli görevler ve farklı atmosfer bileşimleri için elimizde mikro-yerçekimi kadar veri yoktur; ESA gibi kurumlar azaltılmış yerçekiminde yangın davranışını araştırmayı sürdürüyor <span class="sf-ref">[10]</span>. Kalın yakıtlar, çok bölmeli araçlar ve gerçek yaşam alanı eşyaları (kablo, ambalaj, tekstil) için de veriler sınırlıdır.</p>
+      <p class="sf-concl"><b>Sonuç:</b> En gerçekçi strateji, (1) yanmaz veya zor yanan malzeme ve kontrollü atmosfer, (2) yangına uygun tasarlanmış erken algılama, (3) akış kontrolü ve uygun söndürücülerle hızlı müdahale, (4) söndürme sonrası gaz izleme ve temizlik, (5) düzenli tatbikat ve (6) yörünge verisiyle sürekli doğrulanan modellerdir. Yangın riski sıfırlanamaz; ancak bu katmanlar birlikte uygulanırsa küçük bir olayın felakete dönüşme olasılığı belirgin biçimde azaltılabilir.</p>
+      <p class="sf-note">Köşeli parantezler kaynakçadaki numaralara karşılık gelir. Bu bölüm kaynaklardan derlenmiş bir sentezdir; resmi NASA prosedürü veya tasarım gereksinimi değildir.</p>
+    </div>
+  </section>
+
+  <section class="sf-sec sf-refs">
+    <h2>Kaynakça</h2>
+    <p class="sf-note" style="margin-top:0">Birincil kaynaklar NASA ve hakemli yayınlardır; ikincil (haber/derleme) kaynaklar ayrıca işaretlenmiştir.</p>
+    <h3 class="sf-h3">Birincil kaynaklar</h3>
+    <ol>
+      <li>Urban, D. L., Ferkul, P., Olson, S., Ruff, G. A., Easton, J. ve ark. <i>Saffire: A Novel Approach to Study of Spacecraft Fire Safety Using Un-manned Spacecraft.</i> NASA NTRS 20180005168. <a href="https://ntrs.nasa.gov/api/citations/20180005168/downloads/20180005168.pdf" target="_blank" rel="noopener">ntrs.nasa.gov</a></li>
+      <li>Olson, S., Urban, D., Ruff, G., Easton, J. ve ark. <i>Results of Large-Scale Spacecraft Flammability Tests.</i> 47th ICES, 2017. NTRS 20170008805. <a href="https://ntrs.nasa.gov/citations/20170008805" target="_blank" rel="noopener">ntrs.nasa.gov</a></li>
+      <li><i>Spacecraft Fire Safety Demonstration (Saffire I–III genel bakış).</i> NASA NTRS 20170002628. <a href="https://ntrs.nasa.gov/api/citations/20170002628/downloads/20170002628.pdf" target="_blank" rel="noopener">ntrs.nasa.gov</a></li>
+      <li>Urban, D. L., Ruff, G. A., Ferkul, P., Easton, J., Owens, J., Olson, S., Meyer, M. ve ark. <i>Fire Safety Implications of Preliminary Results from Saffire IV and V Experiments on Large Scale Spacecraft Fires.</i> ICES-2021-266. NTRS 20210011521. <a href="https://ntrs.nasa.gov/api/citations/20210011521/downloads/ICES%202021-266%200503-2021%20final.pdf" target="_blank" rel="noopener">ntrs.nasa.gov</a> · Sunum: <a href="https://ntrs.nasa.gov/api/citations/20210017780/downloads/Saffire%20ICES%202021%20Saffire%20Final%20presentation%20compressed.pdf" target="_blank" rel="noopener">NTRS 20210017780</a></li>
+      <li><i>Preliminary Results from the Saffire VI Experiment.</i> 53rd ICES, Louisville, Temmuz 2024. NTRS 20240002981. <a href="https://ntrs.nasa.gov/citations/20240002981" target="_blank" rel="noopener">ntrs.nasa.gov</a> · Sunum: <a href="https://ntrs.nasa.gov/api/citations/20240007488/downloads/Saffire%20ICES%202024%20Saffire%20presentation072124small.pdf" target="_blank" rel="noopener">NTRS 20240007488</a></li>
+      <li><i>Droplet combustion / Flame Extinguishment Experiments (FLEX) ilk sonuçları.</i> Microgravity Science and Technology. DOI: 10.1007/s12217-014-9372-2. <a href="https://link.springer.com/doi/10.1007/s12217-014-9372-2" target="_blank" rel="noopener">link.springer.com</a></li>
+      <li>Stocker, D. P. ve ark. <i>Advanced Combustion via Microgravity Experiments (ACME).</i> NASA NTRS 20210021781. <a href="https://ntrs.nasa.gov/api/citations/20210021781/downloads/JASMAC%20ACME%20paper%2020210921.pdf" target="_blank" rel="noopener">ntrs.nasa.gov</a></li>
+      <li>NASA. <i>You're Hot, Then You're Cold</i> (soğuk alevler). <a href="https://www.nasa.gov/missions/station/iss-research/youre-hot-then-youre-cold" target="_blank" rel="noopener">nasa.gov</a></li>
+      <li>NASA. <i>Combustion safety</i> (BASS-II, SoFIE özeti), Aralık 2023. <a href="https://phys.org/news/2023-12-combustion-safety.pdf" target="_blank" rel="noopener">phys.org (NASA kaynaklı)</a></li>
+    </ol>
+    <h3 class="sf-h3">İkincil kaynaklar</h3>
+    <ol start="10">
+      <li>ESA. <i>No fire in the sky: preventing an astronaut's worst nightmare.</i> <a href="https://esa.int/Enabling_Support/Space_Engineering_Technology/No_fire_in_the_sky_preventing_an_astronaut_s_worst_nightmare" target="_blank" rel="noopener">esa.int</a></li>
+      <li>Universe Today. <i>Fire! How the Mir Incident Changed Space Station Safety.</i> <a href="https://universetoday.com/100229/fire-how-the-mir-incident-changed-space-station-safety/amp" target="_blank" rel="noopener">universetoday.com</a></li>
+      <li>Gizmodo (io9). <i>That One Time a Fire Almost Destroyed the Mir Space Station.</i> <a href="https://gizmodo.com/that-one-time-a-fire-almost-destroyed-the-mir-space-sta-5978305" target="_blank" rel="noopener">gizmodo.com</a></li>
+      <li>Gizmodo. <i>This Is What Happens When You Play With Fire In Space</i> (soğuk alev sıcaklıkları). <a href="https://gizmodo.com/this-is-what-happens-when-you-play-with-fire-in-space-514274963" target="_blank" rel="noopener">gizmodo.com</a></li>
+      <li>Carthage College, Wisconsin Space Conference makalesi: ISS portatif söndürücüler ve 1967–1997 yangın olayları (Barr, 2010; Sanchez, 2000'e atıfla). <a href="https://dione.carthage.edu/ojs/index.php/wsc/article/download/153/152/334" target="_blank" rel="noopener">carthage.edu</a></li>
+      <li>Astronomy.com. Uzay uçuşu kazaları zaman çizelgesi (Apollo 1 ve Mir). <a href="https://www.astronomy.com/?p=41256" target="_blank" rel="noopener">astronomy.com</a></li>
+      <li>Coopers Fire. <i>Spaceflight's Chequered History with Fire.</i> <a href="https://www.coopersfire.com/news/fires-on-mars-how-to-uphold-fire-safety-off-planet/" target="_blank" rel="noopener">coopersfire.com</a></li>
+    </ol>
+    <p class="sf-note">Bu sayfa eğitim amaçlı bir özettir; sayısal değerler ilgili yayınlardan alınmıştır, ancak ayrıntılı tasarım veya sertifikasyon için orijinal NASA belgelerine başvurulmalıdır.</p>
+  </section>
+
+</div>
+</div>
+
+
+<script>
+"use strict";
+/* ---------- yardımcılar ---------- */
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+const R_GAS=8.314;
+
+/* ---------- GAZ TANIMLARI (Molar kütle g/mol, renk, IDLH/eşik referansı ppm) ---------- */
+const GAS_META={
+  CO:  {label:'CO (Karbonmonoksit)',   short:'CO',  M:28.01, col:'#4cc9f0', limit:35,   idlh:1200},
+  CO2: {label:'CO₂ (Karbondioksit)',   short:'CO₂', M:44.01, col:'#94a3b8', limit:5000, idlh:40000},
+  HCN: {label:'HCN (Hidrojen Siyanür)',short:'HCN', M:27.03, col:'#f87171', limit:4.7,  idlh:50},
+  HCl: {label:'HCl (Hidrojen Klorür)', short:'HCl', M:36.46, col:'#a3e635', limit:5,    idlh:50},
+  HF:  {label:'HF (Hidrojen Florür)',   short:'HF',  M:20.01, col:'#e879f9', limit:3,    idlh:30},
+  NOx: {label:'NOx (Azot Oksitler)',   short:'NOx', M:46.01, col:'#fb923c', limit:5,    idlh:20},
+  SO2: {label:'SO₂ (Kükürt Dioksit)',  short:'SO₂', M:64.07, col:'#facc15', limit:2,    idlh:100},
+  VOC: {label:'UOB / CH₄ (Hidrokarbon)',short:'UOB',M:16.04, col:'#34d399', limit:50,   idlh:1000}
+};
+
+/* ---------- malzemeler ----------
+ Literatür tabanlı (SFPE Handbook / Tewarson / NASA WSTF) gaz verimleri:
+ co, co2, soot: kg/kg
+ gases: { HCN, HCl, HF, NOx, SO2, VOC } -> g/kg (gram gaz / kg yanan yakıt) */
+const MATS=[
+ {id:'cotton',name:'Pamuk (kumaş)',cat:'Tekstil',use:'Mürettebat giysisi, havlu, temizlik bezi',col:'#d9d2c0',loi:18,V0:5,d0:0.35,rho:400,c:1300,k:0.06,dHc:16.1,Tig:255,soot:0.015,co:0.012,co2:1.30,Lg:3.6,
+  gases:{VOC:8.5,NOx:0.4}},
+ {id:'sibal',name:'SIBAL (pamuk/cam elyafı)',cat:'Tekstil',use:'Saffire mikro-g yangın deneylerinin numune kumaşı',col:'#cbbf9f',loi:20.5,V0:3,d0:0.4,rho:500,c:1100,k:0.07,dHc:12,Tig:270,soot:0.02,co:0.020,co2:1.00,Lg:4.0,
+  gases:{VOC:11.0,NOx:0.6}},
+ {id:'nomex',name:'Nomex (meta-aramid)',cat:'Tekstil',use:'Giysi, eldiven, kablo koruma, yalıtım dış katmanı',col:'#c9a24a',loi:29.5,V0:2,d0:0.32,rho:500,c:1300,k:0.08,dHc:30,Tig:430,soot:0.03,co:0.030,co2:2.00,Lg:5.0,
+  gases:{HCN:9.5,NOx:14.0,VOC:6.0}},
+ {id:'kevlar',name:'Kevlar 49 (para-aramid)',cat:'Tekstil',use:'Mikrometeorit koruma katmanı, bağlama kayışı, giysi dış katmanı',col:'#d8c46a',loi:29,V0:1.5,d0:0.4,rho:1440,c:1420,k:0.04,dHc:30,Tig:480,soot:0.04,co:0.030,co2:2.00,Lg:5.0,
+  gases:{HCN:11.0,NOx:16.5,VOC:5.5}},
+ {id:'nylon',name:'Naylon 6,6 (Velcro, kemer)',cat:'Polimer',use:'Velcro (kanca-ilmek), kemer, çanta, halat',col:'#3b5bdb',loi:24,V0:2.5,d0:1.0,rho:1140,c:1700,k:0.25,dHc:29,Tig:400,soot:0.075,co:0.038,co2:2.06,Lg:2.4,
+  gases:{HCN:18.0,NOx:12.5,VOC:15.0}},
+ {id:'pmma',name:'PMMA (pleksiglas)',cat:'Polimer',use:'Pencere/kapak, ekran koruyucu; Saffire kalın numune',col:'#aee6f5',loi:17,V0:0.6,d0:10,rho:1180,c:1470,k:0.19,dHc:24.9,Tig:300,soot:0.022,co:0.010,co2:2.12,Lg:1.6,
+  gases:{VOC:22.0,NOx:0.2}},
+ {id:'pe',name:'Polietilen (poşet, film)',cat:'Polimer',use:'Torba, ambalaj, radyasyon kalkanı malzemesi',col:'#e9eef2',loi:17,V0:1.5,d0:0.1,rho:940,c:2300,k:0.4,dHc:43.3,Tig:340,soot:0.060,co:0.024,co2:2.76,Lg:2.3,
+  gases:{VOC:19.0}},
+ {id:'pefoam',name:'Polietilen köpük',cat:'Köpük',use:'Ambalaj ve yastıklama köpüğü',col:'#f2f2f2',loi:17,V0:8,d0:12,rho:30,c:2300,k:0.04,dHc:43.3,Tig:340,soot:0.060,co:0.024,co2:2.76,Lg:2.3,
+  gases:{VOC:21.0}},
+ {id:'pp',name:'Polipropilen',cat:'Polimer',use:'Gıda kapları, ambalaj, küçük kasalar',col:'#f0e6c8',loi:17,V0:1.2,d0:1.0,rho:900,c:1900,k:0.22,dHc:43.3,Tig:330,soot:0.059,co:0.024,co2:2.79,Lg:2.0,
+  gases:{VOC:18.5}},
+ {id:'pu',name:'Poliüretan köpük (esnek)',cat:'Köpük',use:'Yastık/koltuk, koruyucu ambalaj köpüğü',col:'#e6c84d',loi:17,V0:15,d0:20,rho:30,c:1500,k:0.035,dHc:25,Tig:280,soot:0.131,co:0.031,co2:1.50,Lg:1.5,
+  gases:{HCN:14.5,NOx:9.2,VOC:24.0}},
+ {id:'kapton',name:'Kapton (poliimid)',cat:'Polimer',use:'Kablo yalıtımı, esnek devre, termal battaniye katmanı',col:'#d98c1f',loi:37,V0:0.8,d0:0.075,rho:1420,c:1090,k:0.12,dHc:22,Tig:560,soot:0.05,co:0.050,co2:1.70,Lg:5.0,
+  gases:{HCN:12.0,NOx:15.0,VOC:4.5}},
+ {id:'ptfe',name:'PTFE (Teflon)',cat:'Florlu polimer',use:'Kablo yalıtımı, conta, kaplama',col:'#f4f4f4',loi:95,V0:0.3,d0:0.25,rho:2200,c:1000,k:0.25,dHc:5,Tig:550,soot:0.02,co:0.030,co2:0.30,Lg:2.4,
+  gases:{HF:165.0,VOC:12.0}},
+ {id:'etfe',name:'ETFE (Tefzel)',cat:'Florlu polimer',use:'Kablo yalıtımı',col:'#e8d0a0',loi:31,V0:0.6,d0:0.2,rho:1700,c:1900,k:0.24,dHc:13,Tig:450,soot:0.05,co:0.050,co2:0.80,Lg:2.5,
+  gases:{HF:110.0,VOC:14.0}},
+ {id:'silicone',name:'Silikon kauçuk (PDMS)',cat:'Elastomer',use:'Conta, hortum, sızdırmazlık',col:'#d95f5f',loi:26,V0:0.5,d0:2,rho:1100,c:1460,k:0.2,dHc:25,Tig:400,soot:0.05,co:0.040,co2:1.00,Lg:2.5,
+  gases:{VOC:28.0}},
+ {id:'paper',name:'Kâğıt / karton',cat:'Selüloz',use:'Prosedür kitapçığı, etiket, ambalaj',col:'#f2efe6',loi:19.5,V0:4,d0:0.1,rho:800,c:1340,k:0.1,dHc:16.7,Tig:230,soot:0.015,co:0.004,co2:1.27,Lg:3.6,
+  gases:{VOC:7.5,NOx:0.3}},
+ {id:'wipe',name:'Alkol (IPA) emdirilmiş mendil',cat:'Selüloz',use:'Temizlik/hijyen mendilleri',col:'#e8f2f5',loi:14,V0:12,d0:0.4,rho:300,c:2000,k:0.06,dHc:24,Tig:90,soot:0.008,co:0.005,co2:1.60,Lg:0.9,
+  gases:{VOC:35.0}},
+ {id:'pc',name:'Polikarbonat',cat:'Polimer',use:'Aydınlatma kapağı, kasa, pencere katmanı',col:'#cfd8dc',loi:26,V0:0.5,d0:3,rho:1200,c:1200,k:0.2,dHc:29,Tig:450,soot:0.098,co:0.054,co2:2.30,Lg:2.1,
+  gases:{VOC:16.0}},
+ {id:'pvc',name:'PVC (esnek/sert)',cat:'Polimer',use:'Hortum, kablo kılıfı',col:'#8aa0b4',loi:40,V0:0.4,d0:1,rho:1400,c:1000,k:0.17,dHc:17,Tig:390,soot:0.172,co:0.063,co2:0.46,Lg:2.5,
+  gases:{HCl:420.0,VOC:18.0}},
+ {id:'epoxy',name:'Epoksi / karbon elyaf kompozit',cat:'Kompozit',use:'Yapısal panel, braket, kasa',col:'#2a2f36',loi:24,V0:0.3,d0:2,rho:1500,c:1000,k:0.5,dHc:20,Tig:400,soot:0.10,co:0.080,co2:2.00,Lg:4.0,
+  gases:{HCN:6.5,NOx:8.0,SO2:2.5,VOC:14.0}},
+ {id:'fr4',name:'FR-4 devre kartı laminatı',cat:'Kompozit',use:'Elektronik kartlar (bromlu epoksi + cam elyaf)',col:'#2e7d4f',loi:28,V0:0.3,d0:1.6,rho:1850,c:1100,k:0.3,dHc:14,Tig:400,soot:0.09,co:0.060,co2:1.30,Lg:4.5,
+  gases:{HCl:38.0,HCN:4.5,NOx:6.0,VOC:11.0}},
+ {id:'pet',name:'PET (Mylar) film',cat:'Polimer',use:'Çok katmanlı yalıtım (MLI) battaniyeleri, film',col:'#b8c4d0',loi:21,V0:2,d0:0.025,rho:1390,c:1300,k:0.15,dHc:22,Tig:410,soot:0.08,co:0.070,co2:1.90,Lg:1.4,
+  gases:{VOC:17.5}},
+ {id:'kydex',name:'Kydex (PVC/akrilik alaşımı)',cat:'Polimer',use:'Panel ve kapak levhaları (NASA testlerinde kullanılan)',col:'#6b7787',loi:32,V0:0.6,d0:1.6,rho:1350,c:1300,k:0.18,dHc:20,Tig:380,soot:0.08,co:0.050,co2:1.50,Lg:3.0,
+  gases:{HCl:210.0,VOC:16.5}},
+ {id:'beta',name:'Beta kumaş (PTFE kaplı cam)',cat:'Tekstil',use:'Dış koruyucu örtü, yangına dayanıklı kaplama',col:'#e9e3d0',loi:95,V0:0.1,d0:0.3,rho:2000,c:840,k:0.1,dHc:4,Tig:600,soot:0.02,co:0.030,co2:0.10,Lg:8.0,
+  gases:{HF:45.0,VOC:3.0}}
+];
+
+/* SI bilgi tabanı */
+const MATX={
+ nomex:{tox:52,gas:'CO (30 g/kg), CO₂ (2000 g/kg), NOx (14 g/kg) ve 370 °C üzerinde HCN (9,5 g/kg) açığa çıkar.',proto:'Kabin fanlarını hemen kapatın; yerel ince su sisi uygulayın.',diff:'1 g’de alev kaynağı çekilince kömürleşip söner; µg’de 10–15 cm/s havalandırma ve yüksek O₂ altında yüzeyde sinsi bir alev hattı olarak ilerleyebilir.'},
+ sibal:{tox:74,gas:'Yoğun kurum (20 g/kg), CO (20 g/kg), CO₂ (1000 g/kg) ve uçucu organik bileşikler (11 g/kg).',proto:'Fanları 3 sn içinde durdurun; bölmeyi izole edin, CO₂ söndürücü hazırlayın.',diff:'Saffire’de referans kumaş: µg’de duman tavana çıkmaz, alev çevresinde asılı kalır; yayılma hızlanarak büyüyebilir.'},
+ cotton:{tox:55,gas:'CO (12 g/kg), CO₂ (1300 g/kg), UOB/asetaldehit (8,5 g/kg) ve kurum; için için yanmada CO artar.',proto:'Havalandırmayı kesin, nemli bezle/su sisiyle soğutun.',diff:'1 g’de alev yukarı kaçar; µg’de düşük akışta küresel/yumurta biçimli, daha sönük ama yayılan alev.'},
+ kapton:{tox:68,gas:'500 °C üzerinde CO (50 g/kg), NOx (15 g/kg) ve hidrojen siyanür HCN (12 g/kg).',proto:'İlgili güç hattının enerjisini kesin; CO₂ ile yerel soğutma.',diff:'İnce film konvektif soğuma olmadan hızla ısınır; arklı kablolarda gizli yanma hattı riski.'},
+ ptfe:{tox:96,gas:'ÖLÜMCÜL: aşırı ısınmada yüksek miktarda Hidrojen Florür HF (165 g/kg) ve karbonil florür (COF₂) — alev görünmese de!',proto:'Kabin havasını aktif karbon/LiOH filtresinden geçirin, mürettebat tam yüz maskesi taksın.',diff:'Açık alev iletmez (LOI ~%95) ama µg’de soğuma zayıf olduğundan sessiz piroliz tehlikesi vardır.'},
+ beta:{tox:64,gas:'Aşırı ısınmada PTFE kaplamadan Hidrojen Florür HF (45 g/kg) ve CO (30 g/kg).',proto:'Isı kaynağını uzaklaştırın, havayı filtreleyin.',diff:'Açık alev almaz; ısı yığılması piroliz riskidir.'},
+ etfe:{tox:86,gas:'Yüksek Hidrojen Florür HF (110 g/kg), CO (50 g/kg) ve florokarbon buharları (14 g/kg).',proto:'Devre kesicilerle enerjiyi kesin; iletken çekirdeği CO₂ ile soğutun.',diff:'µg’de bakır çekirdek ısıyı ileri taşıyıp yalıtımı ön ısıtır; kablo boyunca kesintisiz yanma.'},
+ pmma:{tox:72,gas:'CO₂ (2120 g/kg), metil metakrilat monomer buharı/UOB (22 g/kg), kurum (22 g/kg) ve CO (10 g/kg).',proto:'Yüksek soğutma kapasiteli su sisiyle yüzeyi soğutun.',diff:'1 g’de eriyip damlayarak ısı uzaklaşır; µg’de erimiş yakıt yerinde kalır, parlak küresel alevle daha yoğun yanar.'},
+ pu:{tox:94,gas:'AŞIRI TOKSİK: Hidrojen Siyanür HCN (14,5 g/kg), CO (31 g/kg), NOx (9,2 g/kg) ve yoğun is (131 g/kg).',proto:'Mürettebatlı kabinde açıkta kullanılmamalı; tam bölme izolasyonu.',diff:'µg’de saatlerce için için yanıp aniden açık aleve dönüşebilir.'},
+ pefoam:{tox:70,gas:'CO₂ (2760 g/kg), CO (24 g/kg), UOB/parafin buharları (21 g/kg) ve yoğun kurum (60 g/kg).',proto:'Hızlı izolasyon, CO₂ ile bastırma.',diff:'Düşük yoğunluk nedeniyle çok hızlı yayılır; µg’de duman bulutu bölmeyi doldurur.'},
+ silicone:{tox:64,gas:'CO (40 g/kg), UOB/siloksan buharları (28 g/kg) ve ultra ince silika (SiO₂) nanopartikül dumanı.',proto:'CO₂ ile oksijen yer değiştirme; HEPA filtreleri maksimuma alın.',diff:'Silika külü alev yüzeyinde kabuk bağlar; yüksek O₂’de çatlayıp ani parlamalar yapabilir.'},
+ epoxy:{tox:68,gas:'CO (80 g/kg), UOB (14 g/kg), NOx (8 g/kg), HCN (6,5 g/kg), SO₂ (2,5 g/kg) ve karbon lifi tozu.',proto:'Isı kaynağını uzaklaştırın, su sisiyle soğutun; elektronikleri koruyun.',diff:'Lifler ısıyı yüzeyde iletir; µg’de hapsolan gazlar küçük jet alevler oluşturabilir.'},
+ kevlar:{tox:56,gas:'NOx (16,5 g/kg), HCN (11 g/kg), CO (30 g/kg) ve aromatik amin buharları.',proto:'Derinlemesine su sisi veya yerel N₂ seyreltmesi.',diff:'Çok katmanlı dokuma arasında ısı hapsolur; düşük akışta için için ilerleyebilir.'},
+ nylon:{tox:66,gas:'Hidrojen Siyanür HCN (18 g/kg), CO (38 g/kg), NOx (12,5 g/kg) ve UOB (15 g/kg).',proto:'Havalandırmayı kesin, CO₂ ile bastırın.',diff:'1 g’de erimiş damlalar düşerek yangını yayar; µg’de damla düşmez, erimiş kütle yerinde yanar.'},
+ pe:{tox:55,gas:'CO₂ (2760 g/kg), CO (24 g/kg), hidrokarbon buharları (19 g/kg) ve kurum (60 g/kg).',proto:'Hava akışını kesin, soğutma uygulayın.',diff:'İnce film µg’de hızla ısınır; küresel alev ve asılı kurum.'},
+ pvc:{tox:92,gas:'AŞIRI KOROZİF/TOKSİK: Hidrojen Klorür HCl (420 g/kg!), CO (63 g/kg), yoğun kurum (172 g/kg) ve UOB (18 g/kg).',proto:'Kabin izolasyonu, asit gazı scrubber/LiOH filtresi ve solunum cihazı.',diff:'Yüksek klor içeriği alevi bastırsa da aşırı ısınmada çok yüksek miktarda HCl gazı salar.'},
+ kydex:{tox:84,gas:'Yüksek Hidrojen Klorür HCl (210 g/kg), CO (50 g/kg) ve akrilik buharları (16,5 g/kg).',proto:'Isı kaynağını kesin, havalandırmayı durdurup filtre sistemini çalıştırın.',diff:'PVC bileşeni nedeniyle düşük sıcaklıkta pirolizle HCl salmaya başlar.'},
+ fr4:{tox:76,gas:'Halojenli asit gazları HCl/HBr (38 g/kg), CO (60 g/kg), NOx (6 g/kg) ve HCN (4,5 g/kg).',proto:'Elektronik kart gücünü derhal kesin; CO₂ ile soğutun.',diff:'µg’de devre kartı soğuması zayıf olduğundan aşırı ısınan bileşenler halojenli gaz salar.'}
+};
+
+function getMatGases(m){
+  /* Tüm malzemeler için ortak gaz haritası (g/kg cinsinden) */
+  const g={
+    CO: +(m.co*1000).toFixed(1),
+    CO2: +(m.co2*1000).toFixed(1)
+  };
+  if(m.gases){
+    for(const [k,v] of Object.entries(m.gases)){
+      if(v>0) g[k]=v;
+    }
+  }
+  return g;
+}
+
+function matInfo(m){
+  const x=MATX[m.id]||{};
+  const gMap=getMatGases(m);
+  const gStr=Object.entries(gMap).map(([k,v])=>`${GAS_META[k]?GAS_META[k].short:k}: ${v} g/kg`).join(' · ');
+  return {
+    tox:x.tox!=null?x.tox:Math.round(clamp(m.co*900+m.soot*250,15,90)),
+    gas:x.gas? (x.gas + ' ['+gStr+']') : ('Başlıca gaz verimleri: '+gStr+' (kurum: '+(m.soot*1000).toFixed(0)+' g/kg).'),
+    proto:x.proto||'Havalandırmayı kesin, bölmeyi izole edin; CO₂ veya su sisiyle bastırın.',
+    diff:x.diff||'1 g’de alev yukarı uzar, duman tavana çıkar; µg’de alev yakıtı saran küreye yaklaşır ve duman asılı kalır.'
+  };
+}
+
+const tileThick=m=>clamp(m.d0,0.05,5);
+let mat=MATS.find(m=>m.id==='pmma');
+
+const DIL={
+ N2:{name:'Azot (N₂)',M:28.01,k:1.0,tf:1.0},
+ Ar:{name:'Argon (Ar)',M:39.95,k:0.93,tf:1.02},
+ He:{name:'Helyum (He)',M:4.003,k:1.12,tf:1.0},
+ CO2:{name:'Karbondioksit (CO₂)',M:44.01,k:1.35,tf:0.95}
+};
+
+/* ---------- kontrol durumu ---------- */
+const S={p:101.3,x:25,dil:'N2',agent:0,g:1e-6,u:0,dir:'lr',T:22,flux:0,thick:tileThick(mat),side:8,vol:50,feedback:true,unl:true,speed:1,fuelF:1,cov:1};
+
+const PRESETS=[
+ {n:'Küresel alev (µg, durgun hava)',m:'pmma',p:101.3,x:25,g:1e-6,u:0,T:22,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'ISS kabini (havalandırma 10 cm/s)',m:'cotton',p:101.3,x:21,g:1e-6,u:10,T:22,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'Dünya (1 g)',m:'pmma',p:101.3,x:21,g:1,u:0,T:23,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'Mekik EVA hazırlığı (10,2 psia/%26,5)',m:'cotton',p:70.3,x:26.5,g:1e-6,u:10,T:22,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'Keşif atmosferi (8,2 psia/%34), µg',m:'cotton',p:56.5,x:34,g:1e-6,u:2,T:22,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'Ay habitatı (0,166 g)',m:'cotton',p:56.5,x:34,g:0.166,u:0,T:22,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'Mars habitatı (0,38 g)',m:'cotton',p:56.5,x:34,g:0.38,u:0,T:22,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'Apollo kabini (5 psia, %100 O₂)',m:'nylon',p:34.5,x:100,g:1e-6,u:0,T:22,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'Apollo 1 yer testi (16,7 psia)',m:'nylon',p:115.1,x:100,g:1,u:0,T:25,dil:'N2',agent:0,dir:'lr',flux:0},
+ {n:'CO₂ ile bastırma',m:'cotton',p:101.3,x:21,g:1e-6,u:10,T:22,dil:'N2',agent:30,dir:'lr',flux:0}
+];
+const PSI=6.89476;
+
+/* ---------- model ---------- */
+const Hflow=u=>1+0.35*Math.exp(-u/4)+0.5*Math.pow(u/200,2);
+const H_REF=Hflow(10);
+
+function analyze(c,m,xDrop,gOv,uOv,dirOv,fluxOv){
+  const g=gOv!=null?gOv:c.g;
+  const uF=uOv!=null?uOv:c.u;
+  const dir=dirOv||c.dir;
+  const flux=fluxOv!=null?fluxOv:c.flux;
+  const agent=c.agent/100;
+  const xb=c.x/100;
+  const xO2=Math.max(0,xb-(xDrop||0))*(1-agent);
+  const p=Math.max(c.p,0.01);
+  const pO2=p*xO2;
+  const Tk=c.T+273.15;
+  /* gaz karışımı */
+  const Md=DIL[c.dil].M;
+  const Mmix=(1-agent)*(xb*31.999+(1-xb)*Md)+agent*44.01;
+  const rho=p*Mmix/(R_GAS*Tk);
+  const wd=(1-xb)*(1-agent), wc=agent;
+  const Dil=(wd+wc)<1e-6?1:(wd*DIL[c.dil].k+wc*DIL.CO2.k)/(wd+wc);
+  const Tdil=(wd+wc)<1e-6?1:(wd*DIL[c.dil].tf+wc*DIL.CO2.tf)/(wd+wc);
+  /* akış: doğal konveksiyon hızı ~ sqrt(g L) */
+  const ub=Math.min(120,20*Math.sqrt(g)*Math.cbrt(101.3/Math.max(p,1)));
+  const ueff=Math.sqrt(uF*uF+ub*ub);
+  let regime;
+  if(ueff<0.5)regime='Durgun · yayınım baskın';
+  else if(g<1e-3)regime='Mikro-g · zorlanmış akış';
+  else if(ub>uF*1.5)regime='Doğal konveksiyon baskın';
+  else regime='Karma konveksiyon';
+  /* LOI */
+  const pb=Math.max(p,0.5);
+  const Pfac=Math.pow(101.3/pb,0.35)*(1+Math.pow(8/pb,1.5))/1.022;
+  const thickF=clamp(1+0.06*Math.log(c.thick/m.d0),0.85,1.25);
+  const tempF=1-0.0012*(c.T-23);
+  const fluxF=clamp(1-0.012*flux,0.45,1);
+  const gF=1-0.08*(1-Math.min(1,Math.cbrt(g)));
+  const dirF=dir==='con'?0.93:1;
+  const loiEff=m.loi*Pfac*Dil*(Hflow(ueff)/H_REF)*gF*thickF*tempF*fluxF*dirF;
+  const mu=(xO2*100)/loiEff;
+  const burns0=mu>=1&&pO2>=1.5;
+  const sat=clamp((mu-1)/0.25,0,1);
+  /* alev sıcaklığı */
+  const Tad=(1000+2000*Math.sqrt(Math.max(xO2,0)))*(1-0.12*(Dil-1)*(Tdil<1?1:0))*Tdil;
+  const Tfl=293+(Tad-293)*(0.55+0.45*sat);
+  /* yüzeye alevden gelen ısı akısı ve kütle akısı (Tewarson tipi) */
+  const side=Math.max(1,(c.side||20)*Math.sqrt(c.fuelF==null?1:c.fuelF));
+  const th=c.thick;
+  const A=(2*side*side+4*side*Math.min(th,side))/1e6;           /* m2 */
+  const Tsurf=m.Tig+273.15;
+  const qre=0.9*5.67e-8*(Math.pow(Tsurf,4)-Math.pow(Tk,4))/1000;  /* kW/m2 */
+  const Hq=0.3+0.7*Math.sqrt(ueff/(ueff+8));                      /* durgun: alev uzak, akışla yaklaşır */
+  const qfl=25*Math.pow(xO2/0.21,1.1)*Math.pow(p/101.3,0.2)*Hq/Dil;
+  const net=qfl+0.9*flux-qre;
+  const burns=burns0&&net>0.3;
+  const cov=c.cov==null?1:c.cov;
+  const mflux=burns?Math.max(0,net)/m.Lg/1000*(0.35+0.65*sat):0;  /* kg/m2s */
+  const mdot=mflux*A*cov;
+  const eta=0.55+0.4*clamp((mu-1)/0.5,0,1);
+  const HRR=eta*m.dHc*1e6*mdot;
+
+  /* yüzey boyunca alev kaplama hızı (mm/s) */
+  let V=0;
+  if(burns){
+    const Ff=(0.4+0.6*Math.sqrt(ueff/(ueff+8)))*(1+0.8*Math.min(ueff,60)/60)*1.6/(1+Math.pow(ueff/250,2));
+    V=m.V0*Math.pow(xO2/0.21,1.4)*Math.pow(p/101.3,0.35)*Ff*Math.pow(m.d0/c.thick,0.5)*(1+0.08*flux)*(1+0.004*(c.T-23))*(0.35+0.65*sat);
+    V=Math.min(V,500);
+  }
+  /* alev geometrisi */
+  const Tm=(Tfl+Tk)/2;
+  const rhoD=2.3e-5*Math.pow(Tm/300,0.7)*Math.pow(29/Mmix,0.3);
+  const rhoH=p*Mmix/(R_GAS*Tm);
+  const Dm=rhoD/rhoH;
+  const Yinf=Math.max(xO2*31.999/Mmix,1e-4);
+  const sO2=(m.dHc/13.1)*eta;
+  const Rmin=side/2*1.15+3;
+  let Rd=Rmin,Wm=Rmin,Rup=Rmin,Lax=Rmin,PeR=0,Pe=0,b=0,tau=3;
+  if(burns&&mdot>0){
+    Rd=clamp(sO2*mdot/(4*Math.PI*rhoD*Yinf)*1000,Rmin,250);
+    PeR=ueff/100*(Rd/1000)/Dm;
+    Wm=Math.max(Rmin,Rd/Math.pow(1+PeR,0.35));
+    Pe=ueff/100*(Wm/1000)/Dm;
+    Lax=Math.min(700,Wm*(1+0.5*Math.pow(Pe,0.6)));
+    b=Pe/(1+Pe);
+    Rup=Math.max(Rmin,Wm*(1-0.35*b));
+    tau=clamp(Math.min(Rd*Rd/1e6/Dm,(Lax/1000)/Math.max(ueff/100,1e-3)*2),0.4,20);
+  }
+  const beta=ub/(ub+2);
+  let shape;
+  if(!burns)shape='—';
+  else if(Pe<0.35)shape='Küre (difüzyon baskın)';
+  else if(Pe<2)shape='Yumurta (hafif uzamış)';
+  else shape='Damla (konveksiyon baskın)';
+  /* tutuşma */
+  const T0=c.T;
+  const qcr=10*(m.Tig-T0)+0.9*5.67e-8*(Math.pow(m.Tig+273.15,4)-Math.pow(T0+273.15,4));
+  const qIgn=40000+flux*1000;
+  let tign=Infinity;
+  if(qIgn>qcr&&pO2>=1.5){
+    const netI=qIgn-qcr;
+    const thin=m.rho*m.c*(c.thick/1000)*(m.Tig-T0)/netI;
+    const thick=Math.PI/4*m.k*m.rho*m.c*Math.pow(m.Tig-T0,2)/(netI*netI);
+    tign=Math.min(thin,thick);
+  }
+  const sootRate=mdot*1000*m.soot;  /* g/s */
+  return {g,ub,ueff,regime,xO2,pO2,rho,Mmix,loiEff,mu,burns,sat,V,mflux,mdot,A,eta,HRR,qfl,Tfl,Rd,Wm,Rup,Lax,PeR,Pe,b,beta,tau,shape,tign,sootRate,Dil,Dm};
+}
+
+/* ---------- simülasyon durumu ---------- */
+const sim={state:'ready',t:0,tIgniterEnd:0,I:0,sz:0,cov:0,f:1,tBurn:0,paused:false,msg:'',acc:null};
+function resetAcc(){
+  sim.acc={q:0,burnt:0,o2:0,co:0,co2:0,soot:0,hrrNow:0,mol:{}};
+}
+resetAcc();
+let hist={t:[],hrr:[],co:[],gases:{},lastT:-1};
+let cur=analyze(S,mat,0);
+const derived={nTot:0,xDrop:0,ppmCO:0,ppmCO2:0,ppmGas:{},obs:0,o2drop:0,dTgas:0};
+
+function cabinN(){return S.p*1000*S.vol/(R_GAS*(S.T+273.15));}
+function massTile(){return mat.rho*Math.pow(S.side/1000,2)*(S.thick/1000);}
+
+function ignite(){
+  resetAcc();
+  const gMap=getMatGases(mat);
+  const gHist={};
+  for(const k of Object.keys(gMap)) gHist[k]=[];
+  hist={t:[],hrr:[],co:[],gases:gHist,lastT:-1};
+  derived.ppmGas={};
+  for(const k of Object.keys(gMap)) derived.ppmGas[k]=0;
+
+  sim.state='igniting';sim.t=0;sim.I=0;sim.sz=0;sim.cov=0.12;sim.f=1;sim.tBurn=0;sim.msg='';
+  S.fuelF=1;S.cov=sim.cov;
+  smoke.length=0;
+  G.init=true;
+  const M=analyze(S,mat,0);
+  sim.tIgniterEnd=isFinite(M.tign)?clamp(M.tign*1.15+0.5,2,60):4;
+}
+
+function step(dt){
+  const dts=dt*S.speed;
+  const nTot=cabinN();
+  const xDrop=S.feedback?clamp(sim.acc.o2/nTot,0,0.5):0;
+  S.fuelF=S.unl?1:Math.max(sim.f,0.02);S.cov=sim.cov;
+  const M=analyze(S,mat,xDrop);
+  cur=M;
+  sim.t+=dts;
+  let target=0;
+  const gMap=getMatGases(mat);
+
+  switch(sim.state){
+    case 'igniting':
+      target=isFinite(M.tign)?0.35:0.1;
+      /* Tutuşturma sırasında da düşük oranda piroliz gazı salınımı (ısınma fazı) */
+      if(isFinite(M.tign)){
+        const dmPyr=1e-7*dts;
+        for(const [gk,gPerKg] of Object.entries(gMap)){
+          const meta=GAS_META[gk];
+          if(meta){
+            sim.acc.mol[gk]=(sim.acc.mol[gk]||0)+(dmPyr*gPerKg)/meta.M;
+          }
+        }
+      }
+      if(sim.t>=sim.tIgniterEnd){
+        if(M.burns&&isFinite(M.tign)){sim.state='burning';sim.msg='Tutuştu — alev kendini sürdürüyor.';}
+        else{
+          sim.state='dying';
+          sim.msg=!isFinite(M.tign)?'Tutuşturucu akısı parçayı ateşlemeye yetmedi (veya oksijen yok).':'Tutuştu ama ortam koşullarında kendini sürdüremedi — alev söndü (O₂/LOI '+M.mu.toFixed(2)+').';
+        }
+      }
+      break;
+    case 'burning':
+      if(!M.burns){sim.state='dying';sim.msg='Koşullar yanma sınırının altına düştü — alev söndü (O₂/LOI '+M.mu.toFixed(2)+').';}
+      else{
+        target=1;
+        sim.cov=Math.min(1,sim.cov+dts/clamp((S.side*0.5)/Math.max(M.V,0.05),1,25));
+        sim.tBurn+=dts;
+        sim.sz+=(1-sim.sz)*(1-Math.exp(-dts/clamp(M.tau*0.5,0.4,12)));
+        const dm=M.mdot*dts,a=sim.acc;
+        a.q+=M.HRR*dts;a.burnt+=dm;
+        a.o2+=dm*(M.eta*mat.dHc/13.1)*1000/32;
+        a.co+=dm*mat.co*1000/28.01;
+        a.co2+=dm*mat.co2*1000/44.01;
+        a.soot+=dm*mat.soot;
+        a.hrrNow=M.HRR;
+        /* Tüm gazların mol birikimi: dm (kg) * gPerKg (g/kg) / M (g/mol) = mol */
+        for(const [gk,gPerKg] of Object.entries(gMap)){
+          const meta=GAS_META[gk];
+          if(meta){
+            a.mol[gk]=(a.mol[gk]||0)+(dm*gPerKg)/meta.M;
+          }
+        }
+        if(!S.unl){
+          sim.f-=dm/massTile();
+          if(sim.f<=0.03){sim.f=0.03;sim.state='burnout';sim.msg='Parça tamamen yandı (sınırsız yakıt kapalı).';}
+        }
+      }
+      break;
+    default: target=0;
+  }
+
+  if(sim.state!=='burning')sim.acc.hrrNow=0;
+  if(sim.state==='dying'||sim.state==='burnout'||sim.state==='out')sim.sz*=Math.exp(-dts/1.2);
+  sim.I+=(target-sim.I)*Math.min(1,dt*(target>sim.I?3:1.6));
+  if((sim.state==='dying'||sim.state==='burnout')&&sim.I<0.02){sim.state='out';sim.I=0;}
+  const a=sim.acc;
+  derived.nTot=nTot;
+  derived.xDrop=xDrop;
+  derived.ppmCO=a.co/nTot*1e6;
+  derived.ppmCO2=a.co2/nTot*1e6;
+  derived.ppmGas={};
+  for(const gk of Object.keys(gMap)){
+    derived.ppmGas[gk]=((a.mol[gk]||0)/nTot)*1e6;
+  }
+  derived.o2drop=a.o2/nTot*100;
+  derived.obs=(1-Math.exp(-8700*a.soot/S.vol))*100;
+  derived.dTgas=a.q/(nTot*20.8);
+
+  if(sim.state!=='ready'&&sim.t-hist.lastT>=0.5){
+    hist.lastT=sim.t;
+    hist.t.push(sim.t);hist.hrr.push(a.hrrNow);hist.co.push(derived.ppmCO);
+    for(const gk of Object.keys(gMap)){
+      if(!hist.gases[gk]) hist.gases[gk]=[];
+      hist.gases[gk].push(derived.ppmGas[gk]||0);
+      if(hist.gases[gk].length>700) hist.gases[gk].shift();
+    }
+    if(hist.t.length>700){hist.t.shift();hist.hrr.shift();hist.co.shift();}
+  }
+}
+
+/* ---------- görüntü durumu ---------- */
+const G={scale:4,ax:0,ay:-1,tx:300,ty:260,init:true};
+let cv,ctx,cw=800,chh=500,dpr=1;
+const smoke=[];let smokeAcc=0;
+const stars=[];
+for(let i=0;i<110;i++)stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.1+.2,a:Math.random()*.6+.2});
+
+/* gürültü tablosu (alev kenarı titreşimi) */
+const nz=new Float32Array(128*128);
+for(let i=0;i<nz.length;i++)nz[i]=Math.random();
+function vnoise(x,y){
+  const xi=Math.floor(x),yi=Math.floor(y),fx=x-xi,fy=y-yi;
+  const u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy);
+  const x0=xi&127,y0=yi&127,x1=(x0+1)&127,y1=(y0+1)&127;
+  const a=nz[y0*128+x0],b=nz[y0*128+x1],c=nz[y1*128+x0],d=nz[y1*128+x1];
+  return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v;
+}
+function bbRGB(K){
+  const t=clamp(K,1000,9000)/100;let r,g,b;
+  if(t<=66){r=255;g=99.4708*Math.log(t)-161.1196;}
+  else{r=329.6987*Math.pow(t-60,-0.1332);g=288.1222*Math.pow(t-60,-0.0755);}
+  if(t>=66)b=255;else if(t<=19)b=0;else b=138.5177*Math.log(t-10)-305.0448;
+  return [clamp(r,0,255),clamp(g,0,255),clamp(b,0,255)];
+}
+
+function updateGeom(dt){
+  const M=cur;
+  const vx=(S.dir==='rl'?-1:1)*S.u,vy=M.ub,vm=Math.hypot(vx,vy);
+  let tax=0,tay=-1;
+  if(vm>1e-3){tax=vx/vm;tay=-vy/vm;}
+  const k=G.init?1:Math.min(1,dt*5);
+  G.ax+=(tax-G.ax)*k;G.ay+=(tay-G.ay)*k;
+  const n=Math.hypot(G.ax,G.ay)||1;G.ax/=n;G.ay/=n;
+  const Lm=Math.max(M.Lax,10),Rm=Math.max(M.Rup,5),Wm=Math.max(M.Wm,5);
+  const along=Lm+Rm;
+  const needW=along*Math.abs(G.ax)+2*Wm*Math.abs(G.ay);
+  const needH=along*Math.abs(G.ay)+2*Wm*Math.abs(G.ax);
+  const target=clamp(Math.min(cw*0.84/Math.max(needW,20),chh*0.8/Math.max(needH,20)),0.5,14);
+  G.scale=G.init?target:G.scale+(target-G.scale)*(1-Math.exp(-dt*1.2));
+  G.init=false;
+  const off=(Lm-Rm)/2*G.scale;
+  G.tx=cw/2-G.ax*off;G.ty=chh/2-G.ay*off;
+}
+
+/* ---------- alev çizimi (piksel alanı) ---------- */
+const CELL=2;
+let fc=null,fctx=null,fimg=null,FW=0,FH=0;
+function ensureFlameBuf(){
+  FW=Math.max(8,Math.ceil(cw/CELL));FH=Math.max(8,Math.ceil(chh/CELL));
+  if(!fc)fc=document.createElement('canvas');
+  fc.width=FW;fc.height=FH;fctx=fc.getContext('2d');
+  fimg=fctx.createImageData(FW,FH);
+}
+const lut=new Float32Array(64*3);
+function renderFlame(time){
+  const M=cur;
+  if(sim.I<0.01||!fimg)return false;
+  const sc=G.scale;
+  const half=S.side*Math.sqrt(S.unl?1:Math.max(sim.f,0.03))/2;
+  const kern=half*1.15+2,z=sim.sz;
+  const Wm=lerp(kern,M.Wm,z)*sc,Ru=lerp(kern,M.Rup,z)*sc,Lx=lerp(kern,M.Lax,z)*sc;
+  const b=M.b,pp=2-0.45*b,qq=0.5+0.28*b;
+  const beta=M.beta;
+  const sootF=clamp(mat.soot/0.05,0.1,1)*(0.4+0.6*M.sat);
+  const lum=sim.I*(0.4+0.6*M.sat);
+  const sb=clamp(0.045*Wm,2.2,9);
+  const amp=0.02+0.5*beta;
+  const spd=clamp(M.ueff*sc*0.6,10,260);
+  const tileR=half*sc;
+  const Tv=M.Tfl*0.85;
+  for(let i=0;i<64;i++){
+    const rgb=bbRGB(lerp(Tv,1400,Math.pow(i/63,0.8)));
+    lut[i*3]=rgb[0]/255;lut[i*3+1]=rgb[1]/255;lut[i*3+2]=rgb[2]/255;
+  }
+  const data=fimg.data;data.fill(0);
+  const ext=Math.max(Lx,Ru,Wm)*1.3+20;
+  const x0=Math.max(0,Math.floor((G.tx-ext)/CELL)),x1=Math.min(FW-1,Math.ceil((G.tx+ext)/CELL));
+  const y0=Math.max(0,Math.floor((G.ty-ext)/CELL)),y1=Math.min(FH-1,Math.ceil((G.ty+ext)/CELL));
+  const ax=G.ax,ay=G.ay;
+  const kf=1.7/(Wm*0.9+10);
+  const useNoise=amp>0.04;
+  for(let py=y0;py<=y1;py++){
+    const y=(py+0.5)*CELL-G.ty;
+    for(let px=x0;px<=x1;px++){
+      const x=(px+0.5)*CELL-G.tx;
+      const s=x*ax+y*ay,t=-x*ay+y*ax,at=t<0?-t:t;
+      let D,xr=0;
+      if(s>=0){
+        xr=s/Lx;
+        if(xr>=1){const ds=s-Lx;D=-Math.sqrt(ds*ds+t*t);}
+        else{
+          const w0=1-Math.pow(xr,pp);
+          const hw=Wm*Math.pow(w0,qq);
+          const sl=Math.min(6,Wm*qq*Math.pow(w0,qq-1)*pp*Math.pow(xr,pp-1)/Lx);
+          D=hw>at?(hw-at)/Math.sqrt(1+sl*sl):hw-at;
+        }
+      }else{
+        const xb=-s/Ru;
+        if(xb>=1){const ds=-s-Ru;D=-Math.sqrt(ds*ds+t*t);}
+        else{
+          const w0=Math.sqrt(1-xb*xb);
+          const sl=Math.min(6,Wm*xb/(Math.max(w0,1e-3)*Ru));
+          const hw=Wm*w0;
+          D=hw>at?(hw-at)/Math.sqrt(1+sl*sl):hw-at;
+        }
+      }
+      if(D<-7*sb)continue;
+      if(useNoise){
+        const nx=(s-time*spd)*kf,ny=t*kf+7.3;
+        const n=(vnoise(nx,ny)-0.5)+0.5*(vnoise(nx*2.1+3,ny*2.1)-0.5);
+        D+=n*amp*Wm*0.55*(0.15+clamp(s/Lx,0,1));
+      }
+      let blue;
+      if(D>=0)blue=Math.exp(-0.8*(D/sb)*(D/sb));
+      else{const e=D/(sb*0.9);blue=Math.exp(-e*e);}
+      const xc=clamp(xr,0,1);
+      blue*=0.55+0.45*(1-xc*beta);
+      let yel=0;
+      const rr=Math.sqrt(x*x+y*y);
+      if(D>0){
+        const inner=smooth(0,3*sb,D);
+        const fuelFade=smooth(tileR*1.05,tileR*1.9+Wm*0.12,rr);
+        const buoy=(0.15+0.85*smooth(0.05,0.45,xc))*(1-0.75*smooth(0.72,1,xc))*inner*fuelFade;
+        const e2=(D-2.4*sb)/(1.5*sb);
+        const shell=Math.exp(-e2*e2)*0.55*fuelFade;
+        yel=sootF*(beta*buoy+(1-beta)*shell);
+      }
+
+      let baseBlue=0;
+      if(D>0&&beta>0.1)baseBlue=beta*0.3*Math.exp(-rr*rr/(Wm*Wm*0.35))*smooth(tileR*0.9,tileR*1.6,rr);
+      const bl=(blue+baseBlue)*lum*1.25;
+      const idx=Math.min(63,(xc*63)|0)*3;
+      const yl=yel*lum*1.5;
+      let r=bl*70+yl*lut[idx]*255;
+      let g=bl*135+yl*lut[idx+1]*255;
+      let bb=bl*255+yl*lut[idx+2]*255;
+      if(r<0.8&&g<0.8&&bb<0.8)continue;
+      const o=(py*FW+px)*4;
+      data[o]=r>255?255:r;data[o+1]=g>255?255:g;data[o+2]=bb>255?255:bb;data[o+3]=255;
+    }
+  }
+  fctx.putImageData(fimg,0,0);
+  return true;
+}
+
+function spawnSmoke(dt){
+  const M=cur;
+  if(sim.I<0.2||sim.state!=='burning')return;
+  const idx=clamp(M.sootRate*1e4,0.06,1);
+  if(mat.soot<0.03)return;
+  smokeAcc+=28*idx*sim.I*dt;
+  const sc=G.scale;
+  const Lx=M.Lax*sc*sim.sz,Wm=M.Wm*sc*sim.sz;
+  const w=clamp(M.b,0,1);
+  const vs=clamp(M.ueff*sc*0.5,5,140);
+  while(smokeAcc>=1&&smoke.length<420){
+    smokeAcc-=1;
+    const th=Math.random()*6.283;
+    const rx=Math.cos(th),ry=Math.sin(th);
+    const px=G.tx+G.ax*Lx*0.92+(Math.random()-0.5)*Wm*0.4;
+    const py=G.ty+G.ay*Lx*0.92+(Math.random()-0.5)*Wm*0.4;
+    const rad=3.5*(1-w);
+    smoke.push({x:px+rx*Wm*(1-w)*0.9,y:py+ry*Wm*(1-w)*0.9,
+      vx:G.ax*vs*w+rx*rad,vy:G.ay*vs*w+ry*rad,age:0,life:5+Math.random()*4,r:6+Math.random()*8});
+  }
+}
+function updateSmoke(dt){
+  for(let i=smoke.length-1;i>=0;i--){
+    const p=smoke[i];p.age+=dt;
+    if(p.age>=p.life||p.x<-30||p.x>cw+30||p.y<-30||p.y>chh+30){smoke.splice(i,1);continue;}
+    p.x+=p.vx*dt+(Math.random()-0.5)*8*dt;p.y+=p.vy*dt+(Math.random()-0.5)*8*dt;p.r+=dt*4;
+  }
+}
+
+function hex2rgb(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+function niceLen(mm){
+  const c=[0.5,1,2,5,10,20,50,100,200,500];
+  let best=c[0];for(const v of c)if(v<=mm)best=v;return best;
+}
+
+function draw(time){
+  const M=cur,W=cw,H=chh;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.globalCompositeOperation='source-over';
+  ctx.globalAlpha=1;
+  ctx.filter='none';
+  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#03050a');bg.addColorStop(1,'#0a101e');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(const s of stars){ctx.fillStyle='rgba(200,215,255,'+s.a*0.45+')';ctx.fillRect(s.x*W,s.y*H,s.r,s.r);}
+  const sc=G.scale;
+  const sideNow=S.side*Math.sqrt(S.unl?1:Math.max(sim.f,0.03));
+  const aPx=Math.max(8,sideNow*sc),hp=aPx/2;
+  /* akış okları */
+  if(S.u>0.05){
+    const sign=S.dir==='rl'?-1:1,spd=clamp(S.u*sc*3,15,150);
+    ctx.strokeStyle='rgba(76,201,240,.33)';ctx.lineWidth=1.5;
+    const off=((performance.now()/1000*spd*sign)%70+70)%70;
+    for(let k=-1;k<W/70+1;k++){
+      const x=k*70+off,y=26;
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+16*sign,y);ctx.lineTo(x+11*sign,y-4);ctx.moveTo(x+16*sign,y);ctx.lineTo(x+11*sign,y+4);ctx.stroke();
+    }
+    ctx.fillStyle='rgba(76,201,240,.85)';ctx.font='11px system-ui';ctx.textAlign='left';
+    ctx.fillText('Hava akışı '+S.u.toFixed(2)+' cm/s',10,46);
+  }
+  /* duman */
+  for(const p of smoke){
+    const a=(1-p.age/p.life);
+    ctx.fillStyle='rgba(120,125,138,'+(0.09*a)+')';
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.283);ctx.fill();
+  }
+  /* halo */
+  if(sim.I>0.03){
+    const gl=Math.max(cur.Wm,cur.Lax)*sc*0.9*(0.3+0.7*sim.sz)+40;
+    const rgb=bbRGB(cur.Tfl*0.75).map(v=>v|0);
+    const lum=(0.3+0.7*cur.sat)*sim.I;
+    const gx=G.tx+G.ax*(cur.Lax-cur.Rup)/2*sc*sim.sz,gy=G.ty+G.ay*(cur.Lax-cur.Rup)/2*sc*sim.sz;
+    const gg=ctx.createRadialGradient(gx,gy,0,gx,gy,gl);
+    gg.addColorStop(0,'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+0.14*lum+')');gg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=gg;ctx.fillRect(0,0,W,H);
+  }
+  /* tutucu tel */
+  ctx.strokeStyle='#59627f';ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(G.tx,G.ty+hp);ctx.lineTo(G.tx,H);ctx.stroke();
+  /* tutuşturucu */
+  ctx.strokeStyle=sim.state==='igniting'?'#ffb25c':'#6c7388';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(G.tx-hp-16,G.ty-hp*0.6);
+  for(let i=0;i<5;i++)ctx.lineTo(G.tx-hp-12+i*3.2,G.ty-hp*0.6+(i%2?-5:5));
+  ctx.lineTo(G.tx-hp,G.ty-hp*0.3);ctx.stroke();
+  /* alev */
+  if(renderFlame(time)){
+    ctx.globalCompositeOperation='lighter';
+    ctx.imageSmoothingEnabled=true;
+    ctx.drawImage(fc,0,0,W,H);
+    if('filter' in ctx){
+      ctx.filter='blur(7px)';ctx.globalAlpha=0.7;
+      ctx.drawImage(fc,0,0,W,H);
+      ctx.filter='none';ctx.globalAlpha=1;
+    }
+    ctx.globalCompositeOperation='source-over';
+  }
+  /* parça (kare) */
+  const burnedF=S.unl?clamp(sim.tBurn/12,0,1):1-sim.f;
+  const cc=hex2rgb(mat.col);
+  const ch=[28,20,16];
+  const tr=lerp(cc[0],ch[0],0.9*burnedF)|0,tg=lerp(cc[1],ch[1],0.9*burnedF)|0,tb=lerp(cc[2],ch[2],0.9*burnedF)|0;
+  ctx.fillStyle='rgb('+tr+','+tg+','+tb+')';
+  ctx.fillRect(G.tx-hp,G.ty-hp,aPx,aPx);
+  if(sim.I>0.03){
+    const eg=ctx.createRadialGradient(G.tx,G.ty,0,G.tx,G.ty,hp*1.42);
+    eg.addColorStop(0,'rgba(255,110,30,'+0.55*sim.I+')');eg.addColorStop(0.75,'rgba(200,50,10,'+0.35*sim.I+')');eg.addColorStop(1,'rgba(120,20,0,'+0.1*sim.I+')');
+    ctx.fillStyle=eg;ctx.fillRect(G.tx-hp,G.ty-hp,aPx,aPx);
+    ctx.strokeStyle='rgba(255,140,50,'+0.8*sim.I+')';ctx.lineWidth=1.6;
+  }else{ctx.strokeStyle='#3a3f4c';ctx.lineWidth=1;}
+  ctx.strokeRect(G.tx-hp,G.ty-hp,aPx,aPx);
+  /* ölçek çubuğu */
+  const len=niceLen(100/sc),lp=len*sc;
+  ctx.strokeStyle='#9fb0d6';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(16,H-18);ctx.lineTo(16+lp,H-18);ctx.moveTo(16,H-23);ctx.lineTo(16,H-13);ctx.moveTo(16+lp,H-23);ctx.lineTo(16+lp,H-13);ctx.stroke();
+  ctx.fillStyle='#9fb0d6';ctx.font='11px system-ui';ctx.textAlign='left';
+  ctx.fillText(len+' mm',16,H-28);
+  /* yerçekimi göstergesi */
+  const gx=22,gy=H-110;
+  ctx.strokeStyle='#9fb0d6';ctx.lineWidth=2;
+  const gl=clamp(Math.log10(Math.max(S.g,1e-6))+6,0,6.5)/6.5*36;
+  ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx,gy+gl);ctx.stroke();
+  if(gl>3){ctx.beginPath();ctx.moveTo(gx-4,gy+gl-5);ctx.lineTo(gx,gy+gl);ctx.lineTo(gx+4,gy+gl-5);ctx.stroke();}
+  ctx.fillText(S.g<1e-3?'mikro-g':'g ↓',gx+10,gy+14);
+  /* HUD */
+  ctx.textAlign='right';ctx.fillStyle='#cfd8f0';ctx.font='12px system-ui';
+  const hx=W-12;
+  ctx.fillText('Şekil: '+(sim.I>0.05?M.shape:'—'),hx,H-64);
+  ctx.fillText('Alev boyu: '+(sim.I>0.05?(M.Lax*sim.sz).toFixed(0)+' mm':'—'),hx,H-48);
+  ctx.fillText('Isı salınımı: '+sim.acc.hrrNow.toFixed(0)+' W',hx,H-32);
+  ctx.fillText('Alev sıcaklığı: '+(sim.I>0.05?((M.Tfl|0)+' K'):'—'),hx,H-16);
+}
+
+/* ---------- arayüz: kontroller ---------- */
+const CTRL=[
+ {k:'x',lab:'Oksijen (O₂)',unit:'%',min:0,max:100,step:0.1,to:v=>v*10,from:p=>p/10,fmt:v=>v.toFixed(1),grp:'Atmosfer',hint:'Hava %21 · keşif atmosferi %34 · Apollo %100'},
+ {k:'p',lab:'Toplam basınç',unit:'kPa',min:0,max:250,step:0.1,to:v=>Math.sqrt(v/250)*1000,from:p=>250*Math.pow(p/1000,2),fmt:v=>v.toFixed(1),grp:null,hint:'',extra:v=>(v/PSI).toFixed(2)+' psia'},
+ {k:'agent',lab:'CO₂ bastırma ajanı',unit:'%',min:0,max:60,step:0.5,to:v=>v/60*1000,from:p=>p/1000*60,fmt:v=>v.toFixed(1),grp:null,hint:'Hacimce eklenen CO₂ (O₂ seyrelir)'},
+ {k:'g',lab:'Yerçekimi',unit:'g',min:1e-6,max:3,step:'any',to:v=>(Math.log10(v)+6)/6.477*1000,from:p=>Math.pow(10,-6+p/1000*6.477),fmt:fmtG,grp:'Ortam',hint:'µg ≈ 10⁻⁶ g (ISS) · Ay 0,166 · Mars 0,38 · Dünya 1',extra:v=>(v*9.80665).toExponential(1)+' m/s²'},
+ {k:'u',lab:'Rüzgâr / havalandırma hızı',unit:'cm/s',min:0,max:100,step:0.05,to:v=>Math.sqrt(v/100)*1000,from:p=>100*Math.pow(p/1000,2),fmt:v=>v.toFixed(2),grp:null,hint:'0 → durgun hava: mikro-g\'de küresel alev · ISS ≈ 10–20 cm/s'},
+ {k:'T',lab:'Ortam sıcaklığı',unit:'°C',min:-20,max:80,step:0.5,to:v=>(v+20)*10,from:p=>p/10-20,fmt:v=>v.toFixed(1),grp:null,hint:''},
+ {k:'flux',lab:'Dış radyant ısı akısı',unit:'kW/m²',min:0,max:40,step:0.5,to:v=>v/40*1000,from:p=>p/1000*40,fmt:v=>v.toFixed(1),grp:null,hint:'Yakındaki sıcak yüzey / arızalı pil / yangın'},
+ {k:'side',lab:'Parça kenarı (kare)',unit:'mm',min:5,max:60,step:1,to:v=>(v-5)/55*1000,from:p=>5+p/1000*55,fmt:v=>v.toFixed(0),grp:'Parça & kabin',hint:'Küçük numune (varsayılan 8 mm); yakıt sınırsız, alev sürekli yanar'},
+ {k:'thick',lab:'Parça kalınlığı',unit:'mm',min:0.02,max:25,step:'any',to:v=>(Math.log(v/0.02)/Math.log(25/0.02))*1000,from:p=>0.02*Math.pow(25/0.02,p/1000),fmt:v=>v<1?v.toFixed(3):v.toFixed(2),grp:null,hint:''},
+ {k:'vol',lab:'Kabin hacmi',unit:'m³',min:3,max:1000,step:'any',to:v=>(Math.log(v/3)/Math.log(1000/3))*1000,from:p=>3*Math.pow(1000/3,p/1000),fmt:v=>v<100?v.toFixed(1):v.toFixed(0),grp:null,hint:'Orion yaşanabilir hacim ≈ 9 m³ · ISS basınçlı hacim ≈ 916 m³'}
+];
+function fmtG(v){return v>=0.01?v.toFixed(3):v.toExponential(1);}
+const ctlEls={};
+function buildControls(){
+  const host=$('#controls');let html='';
+  for(const c of CTRL){
+    if(c.grp)html+='<h2>'+c.grp+'</h2>';
+    if(c.k==='agent'){
+      html+='<div class="ctl"><div class="row"><label>Seyreltici gaz (dengeleyici)</label></div><select id="dil">'+Object.keys(DIL).map(k=>'<option value="'+k+'">'+DIL[k].name+'</option>').join('')+'</select></div>';
+    }
+    html+='<div class="ctl"><div class="row"><label for="n_'+c.k+'">'+c.lab+'</label><span><input type="number" id="n_'+c.k+'" step="'+c.step+'"><span class="unit">'+c.unit+'</span></span></div>'
+      +'<input type="range" id="r_'+c.k+'" min="0" max="1000" step="1">'
+      +'<div class="hint" id="h_'+c.k+'">'+c.hint+'</div></div>';
+    if(c.k==='g'){
+      html+='<div class="btns" style="margin:-4px 0 10px">'
+       +'<button class="b" data-g="1e-6">µg</button><button class="b" data-g="0.166">Ay</button><button class="b" data-g="0.38">Mars</button><button class="b" data-g="1">Dünya</button><button class="b" data-g="2">2 g</button></div>';
+    }
+    if(c.k==='u'){
+      html+='<div class="ctl"><div class="row"><label>Akış yönü</label></div><select id="dir"><option value="lr">Soldan sağa →</option><option value="rl">Sağdan sola ←</option></select></div>';
+    }
+  }
+  html+='<h2>Simülasyon</h2><div class="ctl"><div class="row"><label>Zaman hızı</label></div><select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="10">10×</option><option value="25">25×</option></select></div>'
+    +'<label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin-bottom:8px"><input type="checkbox" id="unl" checked style="margin-top:3px"><span>Sınırsız yakıt (parça tükenmez, alev sürekli yanar)</span></label>'
+    +'<label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px"><input type="checkbox" id="fb" checked style="margin-top:3px"><span>Kabindeki O₂ tüketimi alevi etkilesin (kapalı hacim)</span></label>';
+  host.innerHTML=html;
+  for(const c of CTRL){
+    const n=$('#n_'+c.k),r=$('#r_'+c.k);
+    ctlEls[c.k]={n,r};
+    r.addEventListener('input',()=>{S[c.k]=c.from(+r.value);syncCtl(c.k);});
+    n.addEventListener('change',()=>{let v=parseFloat(n.value);if(isNaN(v))v=S[c.k];S[c.k]=clamp(v,c.min,c.max);syncCtl(c.k);});
+  }
+  $('#dil').addEventListener('change',e=>{S.dil=e.target.value;});
+  $('#dir').addEventListener('change',e=>{S.dir=e.target.value;});
+  $('#speed').addEventListener('change',e=>{S.speed=+e.target.value;});
+  $('#fb').addEventListener('change',e=>{S.feedback=e.target.checked;});
+  $('#unl').addEventListener('change',e=>{S.unl=e.target.checked;if(S.unl){sim.f=1;if(sim.state==='burnout'){sim.state='burning';sim.msg='';}}});
+  host.querySelectorAll('[data-g]').forEach(b=>b.addEventListener('click',()=>{S.g=+b.dataset.g;syncCtl('g');}));
+  CTRL.forEach(c=>syncCtl(c.k));
+}
+function syncCtl(k){
+  const c=CTRL.find(q=>q.k===k),e=ctlEls[k];
+  e.r.value=Math.round(c.to(S[k]));
+  e.n.value=c.fmt(S[k]);
+  const h=$('#h_'+k);
+  if(c.extra)h.textContent=(c.hint?c.hint+' · ':'')+c.extra(S[k]);
+}
+function syncAll(){CTRL.forEach(c=>syncCtl(c.k));$('#dil').value=S.dil;$('#dir').value=S.dir;$('#speed').value=S.speed;$('#fb').checked=S.feedback;$('#unl').checked=S.unl;}
+
+/* ---------- arayüz: istatistikler ---------- */
+const STAT=[
+ ['Atmosfer',[['pTot','Toplam basınç'],['pO2','O₂ kısmi basıncı'],['xEff','Etkin O₂ oranı'],['rho','Gaz yoğunluğu'],['breath','Solunum']]],
+ ['Ortam',[['gv','Yerçekimi'],['ub','Doğal konveksiyon hızı'],['ueff','Etkin akış hızı'],['reg','Akış rejimi']]],
+ ['Yanabilirlik',[['loi0','LOI (standart, 1 atm)'],['loi','LOI (bu koşullarda)'],['mu','O₂ / LOI oranı'],['state','Durum'],['t1','NASA Test 1 tahmini (1 g, yukarı)']]],
+ ['Alev',[['shape','Alev şekli'],['Rd','Alev yarıçapı / yarı genişliği'],['Lf','Alev uzunluğu (eksen)'],['Pe','Akış / difüzyon oranı (Pe)'],['Tf','Alev tepe sıcaklığı'],['qfl','Alevden yüzeye ısı akısı'],['mflux','Yüzey kütle akısı'],['HRR','Isı salınım hızı'],['mdot','Yakıt tüketimi'],['tign','Tutuşma süresi']]],
+ ['Yanma',[['fuel','Kalan yakıt'],['cov','Alev kaplaması'],['tt','Geçen süre'],['Q','Toplam ısı'],['mb','Yanan kütle']]],
+ ['Kabin etkisi (kapalı hacim)',[['co','CO'],['co2','Eklenen CO₂'],['toxGas','Başlıca toksik gaz (ppm)'],['soot','Kurum'],['obs','Duman opaklığı'],['o2d','O₂ düşüşü'],['dTg','Gaz ısınması (üst sınır)']]]
+];
+function buildStats(){
+  let h='';
+  for(const [t,rows] of STAT){
+    h+='<h2>'+t+'</h2>';
+    for(const [id,l] of rows)h+='<div class="kv"><span>'+l+'</span><span id="s_'+id+'">—</span></div>';
+  }
+  h+='<div class="note" id="matinfo"></div>';
+  $('#stats').innerHTML=h;
+}
+function setS(id,txt,cls){const e=$('#s_'+id);if(!e)return;e.textContent=txt;e.className=cls||'';}
+function updateUI(){
+  const M=cur,a=sim.acc;
+  setS('pTot',S.p.toFixed(1)+' kPa · '+(S.p/PSI).toFixed(2)+' psia · '+(S.p/101.325).toFixed(2)+' atm');
+  setS('pO2',M.pO2.toFixed(1)+' kPa · '+(M.pO2/PSI).toFixed(2)+' psia',M.pO2<17.1?'bad':(M.pO2>25?'warn':'ok'));
+  setS('xEff',(M.xO2*100).toFixed(1)+' %');
+  setS('rho',M.rho.toFixed(3)+' kg/m³');
+  let br;
+  if(M.pO2<17.1)br=['Hipoksi sınırı altında (<2,48 psia pO₂)','bad'];
+  else if(Math.abs(M.pO2-21.2)<2)br=['Normoksik (deniz seviyesi eşdeğeri)','ok'];
+  else if(M.pO2>21.2)br=['Hiperoksik pO₂','warn'];
+  else br=['Solunabilir (hafif düşük pO₂)','warn'];
+  setS('breath',br[0],br[1]);
+  setS('gv',(S.g*9.80665).toExponential(2)+' m/s² ('+fmtG(S.g)+' g)');
+  setS('ub',M.ub.toFixed(2)+' cm/s');
+  setS('ueff',M.ueff.toFixed(2)+' cm/s');
+  setS('reg',M.regime);
+  setS('loi0',mat.loi+' %');
+  setS('loi',M.loiEff.toFixed(1)+' %');
+  setS('mu',M.mu.toFixed(2),M.mu>=1.25?'bad':(M.mu>=1?'warn':'ok'));
+  let st,sc;
+  if(M.pO2<1.5){st='Oksijen yok — yanamaz';sc='ok';}
+  else if(M.mu>=1.25){st='Yanıcı — kendini sürdürür';sc='bad';}
+  else if(M.mu>=1){st='Sınırda — zor sürer';sc='warn';}
+  else{st='Kendiliğinden söner';sc='ok';}
+  setS('state',st,sc);
+  const T1=analyze(S,mat,0,1,0,'con',0);
+  setS('t1',T1.burns?'KALIR (yanma sürüyor)':'GEÇER',T1.burns?'bad':'ok');
+  const live=sim.state==='burning';
+  setS('shape',M.burns?M.shape:'—');
+  setS('Rd',M.burns?(M.Wm*sim.sz).toFixed(1)+' mm (hedef '+M.Wm.toFixed(1)+')':'—');
+  setS('Lf',M.burns?(M.Lax*sim.sz).toFixed(1)+' mm (hedef '+M.Lax.toFixed(1)+')':'—');
+  setS('Pe',M.burns?M.Pe.toFixed(2):'—');
+  setS('Tf',sim.I>0.05?(M.Tfl|0)+' K · '+((M.Tfl-273.15)|0)+' °C':'—');
+  setS('qfl',M.burns?M.qfl.toFixed(1)+' kW/m²':'—');
+  setS('mflux',M.burns?(M.mflux*1000).toFixed(2)+' g/m²s':'—');
+  setS('HRR',a.hrrNow.toFixed(0)+' W');
+  setS('mdot',live?(M.mdot*1000).toFixed(4)+' g/s':'0 g/s');
+  setS('tign',isFinite(M.tign)?M.tign.toFixed(1)+' s':'tutuşmaz',isFinite(M.tign)?'':'warn');
+  setS('fuel',S.unl?'∞ (sınırsız)':(sim.f*100).toFixed(0)+' %');
+  setS('cov',(sim.cov*100).toFixed(0)+' %');
+  setS('tt',sim.t.toFixed(1)+' s');
+  setS('Q',(a.q/1000).toFixed(1)+' kJ');
+  setS('mb',(a.burnt*1000).toFixed(3)+' g');
+  setS('co',derived.ppmCO.toFixed(2)+' ppm',derived.ppmCO>200?'bad':(derived.ppmCO>35?'warn':''));
+  setS('co2',derived.ppmCO2.toFixed(1)+' ppm');
+
+  /* En kritik ikincil toksik gazı bul ve göster */
+  const specKeys=Object.keys(derived.ppmGas).filter(k=>k!=='CO'&&k!=='CO2');
+  if(specKeys.length){
+    let topK=specKeys[0],topRatio=-1;
+    for(const k of specKeys){
+      const val=derived.ppmGas[k]||0;
+      const lim=(GAS_META[k]&&GAS_META[k].limit)||10;
+      if(val/lim>topRatio){topRatio=val/lim;topK=k;}
+    }
+    const vTop=derived.ppmGas[topK]||0;
+    const mTop=GAS_META[topK];
+    const cls=vTop>(mTop.idlh)?'bad':(vTop>(mTop.limit)?'warn':'');
+    setS('toxGas',mTop.short+': '+vTop.toFixed(3)+' ppm',cls);
+  }else{
+    setS('toxGas','—');
+  }
+
+  setS('soot',(a.soot*1e6).toFixed(1)+' mg');
+  setS('obs',derived.obs.toFixed(2)+' %/m',derived.obs>10?'bad':(derived.obs>2?'warn':''));
+  setS('o2d',derived.o2drop.toFixed(3)+' puan');
+  setS('dTg','+'+derived.dTgas.toFixed(1)+' K');
+  const b=$('#badge');
+  const map={ready:['Hazır',''],igniting:['Tutuşturuluyor','warn'],burning:['Yanıyor','fire'],dying:['Sönüyor','out'],burnout:['Parça bitti','out'],out:['Söndü','out']};
+  const m=map[sim.state];b.textContent=m[0];b.className='badge '+m[1];
+  $('#msg').textContent=sim.msg||(sim.state==='igniting'?'Isıtılmış tel parçayı tutuşturmaya çalışıyor…':'');
+  $('#bPause').textContent=sim.paused?'▶ Devam':'⏸ Duraklat';
+  updateSI();
+  drawCharts();
+}
+
+
+/* ---------- grafikler ---------- */
+function setupChart(cnv){
+  const r=cnv.getBoundingClientRect();cnv.width=Math.max(10,r.width*dpr);cnv.height=Math.max(10,r.height*dpr);
+}
+function drawChart(cnv,xs,ys,color,title,unit){
+  const c=cnv.getContext('2d');const w=cnv.width/dpr,h=cnv.height/dpr;
+  c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+  c.fillStyle='#8995b3';c.font='11px system-ui';c.textAlign='left';
+  c.fillText(title,8,14);
+  const pl=42,pb=18,pt=22,pr=8;
+  c.strokeStyle='#1d2740';c.lineWidth=1;
+  c.beginPath();c.moveTo(pl,pt);c.lineTo(pl,h-pb);c.lineTo(w-pr,h-pb);c.stroke();
+  if(xs.length<2)return;
+  const xmax=Math.max(xs[xs.length-1],10);
+  let ymax=0;for(const v of ys)ymax=Math.max(ymax,v);ymax=ymax<=0?1:ymax*1.12;
+  c.textAlign='right';c.fillText(ymax>=100?ymax.toFixed(0):(ymax>=1?ymax.toFixed(1):ymax.toFixed(2)),pl-4,pt+8);
+  c.fillText('0',pl-4,h-pb);
+  c.textAlign='center';c.fillText(xmax.toFixed(0)+' s',w-pr-12,h-4);
+  c.strokeStyle=color;c.lineWidth=1.6;c.beginPath();
+  xs.forEach((x,i)=>{const px=pl+(x/xmax)*(w-pl-pr),py=h-pb-(ys[i]/ymax)*(h-pb-pt);if(i)c.lineTo(px,py);else c.moveTo(px,py);});
+  c.stroke();
+  c.textAlign='right';c.fillStyle=color;c.fillText(unit,w-pr,14);
+}
+
+/* YENİ: Çoklu Gaz Emisyon Grafiği (Çift Eksenli: Sol Eksen Toksik Gazlar ppm, Sağ Eksen CO₂ ppm) */
+function drawGasChart(){
+  const cnv=$('#chGas');
+  const c=cnv.getContext('2d');
+  const w=cnv.width/dpr,h=cnv.height/dpr;
+  c.setTransform(dpr,0,0,dpr,0,0);
+  c.clearRect(0,0,w,h);
+
+  const gMap=getMatGases(mat);
+  const keys=Object.keys(gMap);
+  const toxKeys=keys.filter(k=>k!=='CO2');
+  const hasCO2=keys.includes('CO2');
+
+  /* Efsane (Legend) ve anlık değer haplarını (Pills) güncelle */
+  const legHtml=keys.map(k=>{
+    const meta=GAS_META[k]||{short:k,col:'#fff'};
+    const dash=k==='CO2'?' (sağ eksen, kesikli)':'';
+    return `<span class="gas-leg-item"><i class="gas-leg-dot" style="background:${meta.col}"></i>${meta.short}${dash}</span>`;
+  }).join('');
+  $('#gasLegend').innerHTML=legHtml;
+
+  const pillsHtml=keys.map(k=>{
+    const meta=GAS_META[k]||{short:k,col:'#fff',limit:999999};
+    const ppm=derived.ppmGas[k]||0;
+    const gPerKg=gMap[k];
+    const over=ppm>meta.limit;
+    const valStr=ppm>=100?ppm.toFixed(0):(ppm>=1?ppm.toFixed(2):ppm.toFixed(3));
+    return `<span class="gpill" style="border-color:${over?'#f87171':meta.col+'66'}">
+      <b style="color:${meta.col}">${meta.short}:</b> ${valStr} ppm
+      <span style="color:var(--mut)">(${gPerKg} g/kg)</span>
+    </span>`;
+  }).join('');
+  $('#gasPills').innerHTML=pillsHtml;
+
+  const pl=50,pr=52,pt=24,pb=22;
+  const pw=w-pl-pr,ph=h-pt-pb;
+
+  /* Izgara çizgileri */
+  c.strokeStyle='#1b2540';c.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pt+(ph/4)*i;
+    c.beginPath();c.moveTo(pl,y);c.lineTo(w-pr,y);c.stroke();
+  }
+
+  c.font='11px system-ui';
+  c.fillStyle='#8995b3';
+  c.textAlign='left';
+  c.fillText('Toksik / Yanıcı Gazlar (ppm)',pl,14);
+  c.textAlign='right';
+  c.fillStyle='#94a3b8';
+  c.fillText('CO₂ (ppm)',w-pr,14);
+
+  const xs=hist.t;
+  if(xs.length<2){
+    c.fillStyle='#64748b';c.textAlign='center';
+    c.fillText('Yanma başladığında seçili malzemenin gaz emisyon eğrileri burada çizilir…',pl+pw/2,pt+ph/2);
+    return;
+  }
+
+  const xmax=Math.max(xs[xs.length-1],10);
+  let yMaxTox=0;
+  for(const k of toxKeys){
+    const arr=hist.gases[k]||[];
+    for(const v of arr) if(v>yMaxTox) yMaxTox=v;
+  }
+  yMaxTox=yMaxTox<=0?1:yMaxTox*1.15;
+
+  let yMaxCO2=0;
+  if(hasCO2){
+    const arr=hist.gases['CO2']||[];
+    for(const v of arr) if(v>yMaxCO2) yMaxCO2=v;
+  }
+  yMaxCO2=yMaxCO2<=0?10:yMaxCO2*1.15;
+
+  /* Sol eksen etiketleri (Toksik gazlar) */
+  c.textAlign='right';c.fillStyle='#cbd5e1';
+  for(let i=0;i<=4;i++){
+    const v=yMaxTox*(1-i/4);
+    const lbl=v>=100?v.toFixed(0):(v>=1?v.toFixed(1):v.toFixed(2));
+    c.fillText(lbl,pl-5,pt+(ph/4)*i+4);
+  }
+
+  /* Sağ eksen etiketleri (CO₂) */
+  if(hasCO2){
+    c.textAlign='left';c.fillStyle='#94a3b8';
+    for(let i=0;i<=4;i++){
+      const v=yMaxCO2*(1-i/4);
+      const lbl=v>=100?v.toFixed(0):(v>=1?v.toFixed(1):v.toFixed(2));
+      c.fillText(lbl,w-pr+5,pt+(ph/4)*i+4);
+    }
+  }
+
+  /* X ekseni zaman etiketleri */
+  c.textAlign='center';c.fillStyle='#8995b3';
+  for(let i=0;i<=4;i++){
+    const tv=xmax*(i/4);
+    c.fillText(tv.toFixed(0)+'s',pl+(pw/4)*i,h-6);
+  }
+
+  /* CO₂ eğrisi (sağ eksen, kesikli) */
+  if(hasCO2 && hist.gases['CO2']){
+    const arr=hist.gases['CO2'];
+    c.save();
+    c.strokeStyle=GAS_META.CO2.col;
+    c.lineWidth=1.6;
+    c.setLineDash([5,4]);
+    c.beginPath();
+    arr.forEach((v,i)=>{
+      const px=pl+(xs[i]/xmax)*pw;
+      const py=pt+ph-(v/yMaxCO2)*ph;
+      if(i===0)c.moveTo(px,py);else c.lineTo(px,py);
+    });
+    c.stroke();
+    c.restore();
+  }
+
+  /* Diğer gazların eğrileri (sol eksen, düz çizgi) */
+  for(const k of toxKeys){
+    const arr=hist.gases[k];
+    if(!arr||arr.length<2) continue;
+    const meta=GAS_META[k]||{col:'#fff'};
+    c.strokeStyle=meta.col;
+    c.lineWidth=2;
+    c.beginPath();
+    arr.forEach((v,i)=>{
+      const px=pl+(xs[i]/xmax)*pw;
+      const py=pt+ph-(v/yMaxTox)*ph;
+      if(i===0)c.moveTo(px,py);else c.lineTo(px,py);
+    });
+    c.stroke();
+  }
+}
+
+
+/* ---------- TERMAL KANAL & EŞ-SICAKLIK KESİTLERİ (KAVİSLİ ARKLAR) ---------- */
+function getTempAtDist(rMm, M){
+  const Tamb = S.T;
+  if(sim.I < 0.03 || !M.burns){
+    const fluxBoost = S.flux * 6.5 * Math.exp(-rMm / 45);
+    return Tamb + fluxBoost;
+  }
+  const Tcore = (M.Tfl - 273.15) * sim.I + Tamb * (1 - sim.I);
+  const Rchar = Math.max(12, ((M.Wm + M.Lax) * 0.5) * Math.max(0.25, sim.sz));
+  const rFlameEdge = Math.max(6, M.Wm * Math.max(0.25, sim.sz));
+  if(rMm <= rFlameEdge * 0.45) return Tcore;
+  const dr = rMm - rFlameEdge * 0.45;
+  const diffScale = S.g < 1e-3 ? 1.18 : 0.92;
+  const decay = Math.exp(-Math.pow(dr / (Rchar * diffScale), 1.18));
+  return Tamb + (Tcore - Tamb) * decay;
+}
+
+function findIgnRadius(Tig, M, maxR){
+  if(getTempAtDist(0, M) < Tig) return 0;
+  if(getTempAtDist(maxR, M) >= Tig) return maxR;
+  let lo = 0, hi = maxR;
+  for(let i=0; i<22; i++){
+    const mid = (lo + hi) * 0.5;
+    if(getTempAtDist(mid, M) >= Tig) lo = mid;
+    else hi = mid;
+  }
+  return lo;
+}
+
+let lastRadarDomUpdate = 0;
+function drawRadar(nowMs){
+  const cnv = $('#cvRadar');
+  if(!cnv) return;
+  const c = cnv.getContext('2d');
+  const w = cnv.width / dpr, h = cnv.height / dpr;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, w, h);
+
+  const M = cur;
+  const rawMaxR = Math.max(80, Math.ceil((Math.max(M.Lax, M.Wm) * 2.2) / 20) * 20);
+  const maxR = clamp(rawMaxR, 80, 400);
+
+  /* Arka plan */
+  c.fillStyle = '#04070e';
+  c.fillRect(0, 0, w, h);
+
+  /* Gönderilen görseldeki gibi dikey kanal/tüp geometrisi */
+  const tubeLeft = w * 0.35, tubeRight = w * 0.85;
+  const tubeWidth = tubeRight - tubeLeft;
+  const bottomY = h * 0.88, topY = h * 0.12;
+  const tubeHeight = bottomY - topY;
+
+  /* Kanal dış çizgileri (dikey duvarlar) */
+  c.strokeStyle = '#263352';
+  c.lineWidth = 2;
+  c.beginPath();
+  c.moveTo(tubeLeft, topY); c.lineTo(tubeLeft, bottomY);
+  c.moveTo(tubeRight, topY); c.lineTo(tubeRight, bottomY);
+  c.stroke();
+
+  /* En altta alev kaynağı / yakıt noktası */
+  const sourceX = (tubeLeft + tubeRight) / 2;   /* kabın tam ortası */
+  const sourceY = bottomY - 1 - 6.75;           /* yarıçap(6) + çizgi kalınlığı: tabana temas eder */
+  c.fillStyle = sim.I > 0.05 ? '#ff9d3c' : '#94a3b8';
+  c.beginPath();
+  c.arc(sourceX, sourceY, 6, 0, Math.PI * 2);
+  c.fill();
+  c.strokeStyle = '#fff';
+  c.lineWidth = 1.5;
+  c.stroke();
+
+  /* 4 Sıcaklık Eşiği ve Kesit Yayılımı (Kavisli Arklar) */
+  const ZONES = [
+    {id:'z1', name:'1. Bölge · Çekirdek (>600 °C)', minT:600, col:'#f87171', fill:'rgba(248,113,113,0.22)'},
+    {id:'z2', name:'2. Bölge · Yüksek Isı (400–600 °C)', minT:400, col:'#fb923c', fill:'rgba(251,146,60,0.18)'},
+    {id:'z3', name:'3. Bölge · Orta Isı (250–400 °C)', minT:250, col:'#fbbf24', fill:'rgba(251,191,36,0.14)'},
+    {id:'z4', name:'4. Bölge · Düşük Isı (80–250 °C)', minT:80,  col:'#38bdf8', fill:'rgba(56,189,248,0.10)'}
+  ];
+
+  /* Her sıcaklık eşiği için merkezden (kaynaktan) yukarıya doğru mesafe bul */
+  const maxDistMm = maxR * 1.2;
+  ZONES.forEach((z, idx) => {
+    const rMm = findIgnRadius(z.minT, M, maxR);
+    if(rMm <= 1) return;
+    /* Mesafeyi dikey eksende piksel yüksekliğine dönüştür */
+    const ratio = clamp(rMm / maxDistMm, 0.05, 0.95);
+    const yPos = bottomY - ratio * tubeHeight;
+
+    c.save();
+    c.strokeStyle = z.col;
+    c.lineWidth = 2;
+    c.fillStyle = z.fill;
+
+    /* Görseldeki gibi yukarı doğru kavisli ark (parabolik kesit) çizimi */
+    c.beginPath();
+    c.moveTo(tubeLeft, yPos);
+    /* Kontrol noktası yukarı doğru bombeli */
+    c.quadraticCurveTo((tubeLeft + tubeRight) * 0.5, yPos - 18, tubeRight, yPos);
+    /* Tüp duvarından aşağı kapatıp dolgu yap */
+    c.lineTo(tubeRight, bottomY);
+    c.lineTo(tubeLeft, bottomY);
+    c.closePath();
+    c.fill();
+    c.stroke();
+    c.restore();
+
+    /* Sıcaklık ve malzeme etiketleri (görseldeki notlar stilinde) */
+    c.fillStyle = z.col;
+    c.font = 'bold 11px system-ui';
+    c.textAlign = 'left';
+    c.fillText(z.minT + ' °C', tubeRight + 8, yPos + 4);
+  });
+
+  /* Seçili malzemenin tutuşma sınırı çizgisi (beyaz kavisli ark) */
+  const rSel = findIgnRadius(mat.Tig, M, maxR);
+  if(rSel > 0){
+    const ratioSel = clamp(rSel / maxDistMm, 0.05, 0.95);
+    const ySel = bottomY - ratioSel * tubeHeight;
+    c.save();
+    c.strokeStyle = '#ffffff';
+    c.lineWidth = 2.2;
+    c.setLineDash([3, 3]);
+    c.beginPath();
+    c.moveTo(tubeLeft, ySel);
+    c.quadraticCurveTo((tubeLeft + tubeRight) * 0.5, ySel - 18, tubeRight, ySel);
+    c.stroke();
+    c.restore();
+
+    c.fillStyle = '#ffd7a8';
+    c.font = 'bold 11px system-ui';
+    c.textAlign = 'right';
+    c.fillText(mat.name.split(' ')[0] + ' (' + mat.Tig + '°C)', tubeLeft - 8, ySel + 4);
+  }
+
+  /* Sol tarafta malzeme etiketleri ve akış yönü notu */
+  c.fillStyle = '#8995b3';
+  c.font = '11px system-ui';
+  c.textAlign = 'left';
+  c.fillText('Yanan Madde', tubeLeft - 75, bottomY - 5);
+  c.fillText('Isı Yayılımı ↑', tubeLeft - 75, topY + 12);
+
+  /* Sağ üst bilgi rozeti */
+  c.fillStyle = '#e2e8f0';
+  c.font = 'bold 11px system-ui';
+  c.textAlign = 'left';
+  c.fillText('Çekirdek T₀: ' + Math.round(getTempAtDist(0, M)) + ' °C', 12, 20);
+
+  /* Sağ taraftaki Halka & Malzeme Listesi panelini periyodik güncelle */
+  if(nowMs - lastRadarDomUpdate > 250){
+    lastRadarDomUpdate = nowMs;
+    $('#radarRangeBadge').textContent = 'Termal Kesit Kanalı · Seçili eşik: ' + (rSel > 0 ? rSel.toFixed(1) + ' mm' : 'Yok');
+    const zonesHtml = ZONES.map((z, idx) => {
+      const rOuter = findIgnRadius(z.minT, M, maxR);
+      const matsInZone = MATS.filter(m => {
+        if(z.id === 'z1') return m.Tig >= 600;
+        if(z.id === 'z2') return m.Tig >= 400 && m.Tig < 600;
+        if(z.id === 'z3') return m.Tig >= 250 && m.Tig < 400;
+        return m.Tig < 250;
+      });
+      const rangeStr = rOuter > 0.5 ? `Yükseklik: ~${rOuter.toFixed(0)} mm` : 'Isı yetersiz';
+      const pills = matsInZone.map(m => {
+        const isSel = m.id === mat.id;
+        return `<span class="rmat${isSel?' active':''}" data-id="${m.id}" title="Tutuşma: ${m.Tig} °C · Seçmek için tıkla"><i style="background:${m.col}"></i>${m.name.split(' ')[0]} (${m.Tig}°)</span>`;
+      }).join('');
+      return `<div class="rzone" style="border-left-color:${z.col};opacity:${rOuter>0.5?1:0.65}">
+        <div class="rzone-top"><span style="color:${z.col}">${z.name}</span><span style="color:#e2e8f0">${rangeStr}</span></div>
+        <div class="rzone-mats">${pills}</div>
+      </div>`;
+    }).join('');
+    const host = $('#radarZones');
+    host.innerHTML = zonesHtml;
+    host.querySelectorAll('.rmat').forEach(el => {
+      el.addEventListener('click', () => selectMat(el.dataset.id));
+    });
+  }
+}
+
+function drawCharts(){
+  drawChart($('#ch1'),hist.t,hist.hrr,'#ff9d3c','Isı salınım hızı (HRR)','W');
+  drawChart($('#ch2'),hist.t,hist.co,'#4cc9f0','Kabinde Karbonmonoksit (CO)','ppm');
+  drawGasChart();
+}
+
+/* ---------- malzeme arayüzü ---------- */
+let tableView=false;
+function matGasBadges(m){
+  const gMap=getMatGases(m);
+  const spec=Object.keys(gMap).filter(k=>k!=='CO'&&k!=='CO2');
+  return spec.map(k=>`<span class="tag tox">${GAS_META[k]?GAS_META[k].short:k} ${gMap[k]}g/kg</span>`).join('');
+}
+function matTags(m){
+  return '<span class="tag">LOI '+m.loi+'%</span><span class="tag">'+m.dHc+' MJ/kg</span>'+matGasBadges(m);
+}
+function renderMats(){
+  const q=$('#search').value.trim().toLowerCase();
+  const list=MATS.filter(m=>{
+    if(!q) return true;
+    const gKeys=Object.keys(getMatGases(m)).join(' ').toLowerCase();
+    return (m.name+' '+m.use+' '+m.cat+' '+gKeys).toLowerCase().includes(q);
+  });
+  $('#matcount').textContent='('+list.length+'/'+MATS.length+')';
+  $('#matcards').innerHTML=list.map(m=>'<div class="mc'+(m.id===mat.id?' sel':'')+'" data-id="'+m.id+'"><b><span class="sw" style="background:'+m.col+'"></span>'+m.name+'</b><div class="u">'+m.use+'</div><div class="tags">'+matTags(m)+'</div></div>').join('');
+  let t='<table><thead><tr><th>Malzeme</th><th>Kategori</th><th>LOI %</th><th>ΔHc MJ/kg</th><th>Tutuşma °C</th><th>CO (g/kg)</th><th>CO₂ (g/kg)</th><th>HCN (g/kg)</th><th>HCl (g/kg)</th><th>HF (g/kg)</th><th>NOx / SO₂ (g/kg)</th><th>UOB (g/kg)</th><th>Kurum (g/kg)</th><th>Kullanım</th></tr></thead><tbody>';
+  t+=list.map(m=>{
+    const g=m.gases||{};
+    const noxSo2=(g.NOx||g.SO2)?`${g.NOx||0} / ${g.SO2||0}`:'—';
+    return '<tr data-id="'+m.id+'"'+(m.id===mat.id?' class="sel"':'')+'>'
+      +'<td>'+m.name+'</td><td>'+m.cat+'</td><td>'+m.loi+'</td><td>'+m.dHc+'</td><td>'+m.Tig+'</td>'
+      +'<td>'+(m.co*1000).toFixed(0)+'</td><td>'+(m.co2*1000).toFixed(0)+'</td>'
+      +'<td>'+(g.HCN||'—')+'</td><td>'+(g.HCl||'—')+'</td><td>'+(g.HF||'—')+'</td>'
+      +'<td>'+noxSo2+'</td><td>'+(g.VOC||'—')+'</td><td>'+(m.soot*1000).toFixed(0)+'</td>'
+      +'<td>'+m.use+'</td></tr>';
+  }).join('');
+  t+='</tbody></table>';
+  $('#mattable').innerHTML=t;
+  document.querySelectorAll('#matcards .mc,#mattable tbody tr').forEach(e=>e.addEventListener('click',()=>selectMat(e.dataset.id)));
+
+  const gMap=getMatGases(mat);
+  const gText=Object.entries(gMap).map(([k,v])=>`${GAS_META[k]?GAS_META[k].short:k}: ${v} g/kg`).join(' · ');
+  $('#matinfo').innerHTML='<b style="color:var(--tx)">Seçili: '+mat.name+'</b><br>'+mat.use+'<br>LOI '+mat.loi+' % · ΔHc '+mat.dHc+' MJ/kg · tutuşma ≈ '+mat.Tig+' °C<br><span style="color:#fca5a5">Gaz emisyon verimleri: '+gText+' · Kurum: '+(mat.soot*1000).toFixed(0)+' g/kg</span>';
+}
+function selectMat(id){
+  mat=MATS.find(m=>m.id===id)||mat;
+  S.thick=tileThick(mat);syncCtl('thick');
+  renderMats();ignite();
+}
+
+/* ---------- hazır ayarlar / düğmeler ---------- */
+function applyPreset(p){
+  Object.assign(S,{p:p.p,x:p.x,g:p.g,u:p.u,T:p.T,dil:p.dil,agent:p.agent,dir:p.dir,flux:p.flux});
+  if(p.m){mat=MATS.find(m=>m.id===p.m)||mat;S.thick=tileThick(mat);}
+  syncAll();renderMats();ignite();
+}
+function init(){
+  dpr=Math.min(2,window.devicePixelRatio||1);
+  cv=$('#cv');ctx=cv.getContext('2d');
+  buildControls();buildStats();renderMats();
+  $('#presets').innerHTML=PRESETS.map((p,i)=>'<button class="chip" data-i="'+i+'">'+p.n+'</button>').join('');
+  document.querySelectorAll('#presets .chip').forEach(b=>b.addEventListener('click',()=>applyPreset(PRESETS[+b.dataset.i])));
+  $('#bIgnite').addEventListener('click',ignite);
+  $('#bPause').addEventListener('click',()=>{sim.paused=!sim.paused;});
+  $('#bVent').addEventListener('click',()=>{S.u=0;syncCtl('u');});
+  $('#bCO2').addEventListener('click',()=>{S.agent=30;syncCtl('agent');});
+  $('#bVac').addEventListener('click',()=>{S.p=1;syncCtl('p');});
+  $('#search').addEventListener('input',renderMats);
+  $('#bView').addEventListener('click',()=>{
+    tableView=!tableView;
+    $('#matcards').style.display=tableView?'none':'grid';
+    $('#mattable').style.display=tableView?'block':'none';
+    $('#bView').textContent=tableView?'Kart görünümü':'Tablo görünümü';
+  });
+  window.addEventListener('resize',resize);
+  resize();
+  applyPreset(PRESETS[0]);
+  requestAnimationFrame(frame);
+}
+function resize(){
+  const r=cv.getBoundingClientRect();
+  cw=r.width;chh=r.height;
+  cv.width=Math.round(cw*dpr);cv.height=Math.round(chh*dpr);
+  setupChart($('#ch1'));setupChart($('#ch2'));setupChart($('#chGas'));setupChart($('#cvRadar'));
+  ensureFlameBuf();
+  G.init=true;
+}
+let last=performance.now(),lastUI=0;
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(!sim.paused){
+    step(dt);
+    updateGeom(dt);
+    spawnSmoke(dt*S.speed);
+    updateSmoke(dt*S.speed);
+  }
+  draw(now/1000);
+  drawRadar(now);
+  if(now-lastUI>120){updateUI();lastUI=now;}
+  requestAnimationFrame(frame);
+}
+
+/* ---------- SI risk motoru ---------- */
+function siRisk(M,m){
+  const info=matInfo(m);
+  const o2=clamp((M.mu-0.6)/1.2,0,1)*55;
+  const burn=M.burns?14:0;
+  const spread=clamp(M.V/10,0,1)*10;
+  const hrr=clamp(Math.log10(1+M.HRR)/2.5,0,1)*9;
+  const tox=info.tox*0.12;
+  const score=Math.round(clamp(o2+burn+spread+hrr+tox,3,99));
+  let lvl='Düşük',col='#4ade80';
+  if(score>=78){lvl='Kritik';col='#f87171';}
+  else if(score>=56){lvl='Yüksek';col='#fbbf24';}
+  else if(score>=34){lvl='Orta';col='#4cc9f0';}
+  const cold=!M.burns&&S.g<0.3&&M.ueff<8&&M.mu>0.8&&M.mu<1.15&&m.id!=='ptfe'&&m.id!=='beta';
+  return {score,lvl,col,cold,info};
+}
+function updateSI(){
+  const M=cur,m=mat,r=siRisk(M,m);
+  $('#siNum').textContent=r.score;$('#siNum').style.color=r.col;
+  const lv=$('#siLvl');lv.textContent=r.lvl+' risk';lv.style.background=r.col+'33';lv.style.color=r.col;
+  const bf=$('#siBarF');bf.style.width=r.score+'%';bf.style.background=r.col;
+  let t;
+  const xs=(M.xO2*100).toFixed(1),gs=fmtG(S.g);
+  if(m.id==='ptfe'||m.id==='beta'){
+    t=m.name+' bu koşullarda açık alev sürdürmez (O₂/LOI = '+M.mu.toFixed(2)+'); asıl tehlike aşırı ısınmada alevsiz, florlu toksik piroliz gazlarıdır (HF). Optik alev sensörleri bunu göremez.';
+  }else if(r.cold){
+    t='SINIR REJİMİ: O₂/LOI = '+M.mu.toFixed(2)+', akış '+M.ueff.toFixed(1)+' cm/s, '+gs+' g. Görünür alev söndü ama yakıt, mikro-yerçekiminde FLEX deneylerindeki gibi görünmez “soğuk alev”/için için yanmayı sürdürebilir (CO ve formaldehit üretir). Kızılötesi ve gaz sensörleri kullanın.';
+  }else if(!M.burns){
+    t='Seçilen ortamda (%'+xs+' O₂, '+S.p.toFixed(0)+' kPa, '+gs+' g, '+M.ueff.toFixed(1)+' cm/s) '+m.name+' kendini sürdüremiyor (O₂/LOI = '+M.mu.toFixed(2)+'). Dış ısı kaynağı veya O₂ artışı bu sınırı aşabilir.';
+  }else if(r.score>=78){
+    t='KRİTİK: O₂/LOI = '+M.mu.toFixed(2)+' ile alev kendini sürdürüyor, ısı salınımı '+M.HRR.toFixed(0)+' W (küçük numune için çok yüksek). '+(S.g<1e-3?'Mikro-g’de '+M.ueff.toFixed(1)+' cm/s havalandırma aleve sürekli taze oksijen taşır. ':'')+'Hemen müdahale gerekir.';
+  }else if(r.score>=56){
+    t='YÜKSEK: alev sürüyor (O₂/LOI = '+M.mu.toFixed(2)+'), alev şekli '+M.shape+'. '+(S.g<1e-3?'Kaldırma kuvveti olmadığından duman tavana çıkmaz, kabin hacminde asılı kalıp görüşü azaltır.':'Duman yukarı yükselir.');
+  }else{
+    t='KONTROLLÜ: alev sürüyor ama zayıf (O₂/LOI = '+M.mu.toFixed(2)+', '+M.HRR.toFixed(0)+' W). Havalandırmayı kesmek ve CO₂ eklemek alevi söndürmeye yeterli olabilir.';
+  }
+  $('#siText').textContent=t;
+  $('#siDiff').textContent=r.info.diff;
+  $('#siTox').textContent=r.info.gas;
+  $('#siProto').textContent=r.info.proto;
+}
+
+/* ---------- NASA deneyleri ---------- */
+const EXPS=[
+ {id:'saffire',code:'Saffire I–IV',title:'Saffire: Uzay Aracı Yangın Deneyi',plat:'Cygnus kargo aracı · mürettebatsız',yrs:'2016–2020',
+  desc:'ISS’den ayrılan Cygnus araçlarında yapılan, gerçek uzay aracı ölçeğindeki en büyük kontrollü yangın deneyleri. SIBAL kumaşı ve PMMA gibi numuneler, farklı O₂ ve hava akışında yakıldı.',
+  tl:['0s','30s','60s','90s','120s','150s','180s','210s'],tmp:[24,380,690,840,910,880,520,190],flux:[0,4,11,18,22,20,8,1],fluxUnit:'kW (ısı salınımı, örnekleyici)',
+  cl:['Alev yayılımı','Duman yoğunluğu','CO toksisitesi','Görüş kaybı'],e1:[52,48,35,42],u:[86,94,81,92],
+  take:'Saffire-IV’te alev, sabit boyuta ulaşmak yerine büyümeye devam etti; kabin yangınında havalandırma fanları hemen kapatılmalıdır.'},
+ {id:'flex',code:'FLEX / FLEX-2',title:'FLEX: Alev Söndürme Deneyi',plat:'ISS · Combustion Integrated Rack',yrs:'2009–2017',
+  desc:'Serbest yüzen yakıt damlacıklarının küresel yanması; görünür sıcak alev söndükten sonra bile süren görünmez “soğuk alev” keşfedildi.',
+  tl:['0s','4s','8s','12s','16s','20s','24s','28s'],tmp:[25,1380,1450,1320,460,440,425,95],flux:[0,5,5,4,1,1,1,0],fluxUnit:'kW (örnekleyici)',
+  cl:['Küresellik','Soğuk alev süresi','Formaldehit','Optik görünmezlik'],e1:[15,0,18,5],u:[98,95,84,96],
+  take:'Sıcak alev söndükten sonra sıcaklık ~440 °C’de kaldı: uzay araçlarında yalnız optik sensörlere güvenilmemeli, IR ve gaz sensörleri kullanılmalı.'},
+ {id:'bass',code:'BASS-II',title:'BASS-II: Katıların Yanması ve Bastırılması',plat:'ISS · Microgravity Science Glovebox',yrs:'2014–2015',
+  desc:'Katı polimerlerin farklı akış hızlarında yanma oranları ve azotla söndürme sınırları ölçüldü.',
+  tl:['0s','10s','20s','30s','40s','50s','60s','70s'],tmp:[23,490,780,830,815,420,180,85],flux:[0,3,6,6,6,2,0,0],fluxUnit:'kW (örnekleyici)',
+  cl:['Düşük akış duyarlılığı','N₂ söndürme verimi','Kömürleşme','Isı iletimi'],e1:[30,68,55,49],u:[91,84,77,83],
+  take:'Dünya’daki dikey yanma testini geçen malzemeler µg’de hafif (birkaç cm/s) akış altında yanmaya devam edebilir; bu yüzden standart yer testi tek başına yeterli değildir.'},
+ {id:'acme',code:'ACME',title:'ACME: Gelişmiş Yanma (Alev Tasarımı)',plat:'ISS · Combustion Integrated Rack',yrs:'2017–2022',
+  desc:'Gaz jeti difüzyon alevlerinde kurum oluşumu ve radyatif ısı kaybıyla sönme mekanizmaları incelendi.',
+  tl:['0s','5s','10s','15s','20s','25s','30s','35s'],tmp:[24,1520,1610,1590,1540,1490,620,110],flux:[0,4,4,4,4,3,1,0],fluxUnit:'kW (örnekleyici)',
+  cl:['Radyatif ısı kaybı','Kurum hapsolması','Alev küreselliği','İnert gaz etkisi'],e1:[44,32,12,58],u:[90,93,97,86],
+  take:'µg’de kurum alevden kaçamayıp çekirdekte birikir; yoğun radyasyon alevi beklenmedik şekilde söndürebilir veya çevreyi ısıtabilir.'},
+ {id:'sofie',code:'SoFIE-MIST',title:'SoFIE: Katı Yakıt Tutuşma ve Sönme',plat:'ISS · Combustion Integrated Rack',yrs:'2020’ler',
+  desc:'Artemis ve Mars habitatlarındaki düşük basınçlı, yüksek O₂’li atmosferler için katı malzemelerin tutuşma/sönme sınırları ve kalınlık etkisi.',
+  tl:['0s','15s','30s','45s','60s','75s','90s','105s'],tmp:[22,410,720,860,895,870,610,240],flux:[0,3,6,9,10,9,4,1],fluxUnit:'kW (örnekleyici)',
+  cl:['Tutuşma hızı','Yüzey ısı tutma','Düşük basınç riski','Söndürme zorluğu'],e1:[45,38,40,44],u:[79,88,85,76],
+  take:'Habitat atmosferinde (≈%34 O₂, 56 kPa) birçok malzemenin yanabilirliği artar; bu simülatördeki “Keşif atmosferi” ön ayarıyla deneyebilirsiniz.'}
+];
+let expSel='saffire';
+function buildExp(){
+  $('#exptabs').innerHTML=EXPS.map(e=>'<button class="chip'+(e.id===expSel?' act':'')+'" data-id="'+e.id+'">'+e.code+'</button>').join('');
+  document.querySelectorAll('#exptabs .chip').forEach(b=>b.addEventListener('click',()=>{expSel=b.dataset.id;buildExp();}));
+  const e=EXPS.find(x=>x.id===expSel);
+  $('#expdesc').innerHTML='<b>'+e.title+'</b> · '+e.plat+' · '+e.yrs+'<br><span style="color:var(--mut)">'+e.desc+'</span>';
+  $('#exptake').textContent=e.take;
+  drawExp(e);
+}
+function prepC(c){const r=c.getBoundingClientRect();c.width=Math.max(200,r.width*dpr);c.height=Math.max(150,r.height*dpr);const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return [x,c.width/dpr,c.height/dpr];}
+function drawExp(e){
+  let [c,w,h]=prepC($('#expc1'));
+  c.clearRect(0,0,w,h);c.font='11px system-ui';
+  const pl=44,pr=12,pt=26,pb=24,pw=w-pl-pr,ph=h-pt-pb,n=e.tl.length,sx=pw/(n-1);
+  c.fillStyle='#8995b3';c.fillText('Sıcaklık (°C) ve '+e.fluxUnit,8,14);
+  c.strokeStyle='#1d2740';
+  for(let i=0;i<=4;i++){const y=pt+ph/4*i;c.beginPath();c.moveTo(pl,y);c.lineTo(pl+pw,y);c.stroke();c.fillStyle='#8995b3';c.textAlign='right';c.fillText(Math.round(1700-1700/4*i)+'°',pl-4,y+4);}
+  c.textAlign='center';e.tl.forEach((l,i)=>c.fillText(l,pl+i*sx,h-6));
+  c.strokeStyle='#ff9d3c';c.lineWidth=2.2;c.beginPath();e.tmp.forEach((v,i)=>{const x=pl+i*sx,y=pt+ph-v/1700*ph;i?c.lineTo(x,y):c.moveTo(x,y);});c.stroke();
+  c.strokeStyle='#4cc9f0';c.setLineDash([5,4]);c.beginPath();const fm=Math.max(...e.flux,1)*1.15;e.flux.forEach((v,i)=>{const x=pl+i*sx,y=pt+ph-v/fm*ph;i?c.lineTo(x,y):c.moveTo(x,y);});c.stroke();c.setLineDash([]);c.textAlign='left';
+  [c,w,h]=prepC($('#expc2'));
+  c.clearRect(0,0,w,h);c.font='11px system-ui';c.fillStyle='#8995b3';c.fillText('1 g (Dünya) ↔ µg (uzay) karşılaştırma, %',8,14);
+  const gw=pw/e.cl.length,bw=Math.min(26,gw*.28);
+  for(let i=0;i<=4;i++){const y=pt+ph/4*i;c.strokeStyle='#1d2740';c.beginPath();c.moveTo(pl,y);c.lineTo(pl+pw,y);c.stroke();c.fillStyle='#8995b3';c.textAlign='right';c.fillText((100-i*25)+'%',pl-4,y+4);}
+  c.textAlign='center';
+  e.cl.forEach((l,i)=>{const cx=pl+gw*i+gw/2,h1=e.e1[i]/100*ph,h2=e.u[i]/100*ph;c.fillStyle='#64748b';c.fillRect(cx-bw-2,pt+ph-h1,bw,h1);c.fillStyle='#4cc9f0';c.fillRect(cx+2,pt+ph-h2,bw,h2);c.fillStyle='#cbd5e1';c.fillText(l.length>14?l.slice(0,13)+'…':l,cx,h-6);});
+  c.textAlign='left';c.fillStyle='#64748b';c.fillRect(w-150,6,9,9);c.fillStyle='#e8edf8';c.fillText('1 g',w-137,14);c.fillStyle='#4cc9f0';c.fillRect(w-100,6,9,9);c.fillStyle='#e8edf8';c.fillText('µg',w-87,14);
+}
+window.addEventListener('resize',()=>{const e=EXPS.find(x=>x.id===expSel);if(e)drawExp(e);});
+init();
+buildExp();
+
+/* ---------- sekmeler ---------- */
+(function(){
+  const tabs=document.querySelectorAll('.tab');
+  const views={sim:document.getElementById('viewSim'),safety:document.getElementById('viewSafety')};
+  function show(k){
+    Object.keys(views).forEach(n=>{views[n].style.display=(n===k)?'':'none';});
+    tabs.forEach(t=>t.classList.toggle('act',t.dataset.tab===k));
+    try{history.replaceState(null,'',k==='safety'?'#guvenlik':'#simulasyon');}catch(e){}
+    window.scrollTo(0,0);
+    if(k==='sim') setTimeout(()=>window.dispatchEvent(new Event('resize')),0);
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.tab)));
+  if(location.hash==='#guvenlik') show('safety');
+})();
+/* ---------- Yerel Ollama sohbeti ---------- */
+(()=>{
+  const panel=document.getElementById('ollamaPanel');
+  const toggle=document.getElementById('ollamaToggle');
+  const close=document.getElementById('ollamaClose');
+  const status=document.getElementById('ollamaStatus');
+  const messages=document.getElementById('ollamaMessages');
+  const input=document.getElementById('ollamaInput');
+  const send=document.getElementById('ollamaSend');
+  const endpoint='http://localhost:11434/api/chat';
+  const model='qwen2.5:7b';
+  const history=[];
+  const addMessage=(text,who,extra='')=>{
+    const el=document.createElement('div');
+    el.className='ollamaMsg '+who+(extra?' '+extra:'');
+    el.textContent=text;
+    messages.appendChild(el);
+    messages.scrollTop=messages.scrollHeight;
+    return el;
+  };
+  const setStatus=(text,ready=false)=>{
+    status.textContent=text;
+    status.classList.toggle('ready',ready);
+  };
+  toggle.addEventListener('click',()=>{
+    panel.classList.toggle('open');
+    if(panel.classList.contains('open'))input.focus();
+  });
+  close.addEventListener('click',()=>panel.classList.remove('open'));
+  async function checkConnection(){
+    try{
+      const r=await fetch('http://localhost:11434/api/tags');
+      if(!r.ok)throw new Error('Ollama yanıt vermedi');
+      const data=await r.json();
+      const found=(data.models||[]).some(m=>m.name===model||m.name.startsWith(model+':'));
+      setStatus(found?'Bağlandı · '+model:(model+' modeli bulunamadı — terminalde indirin.'),found);
+    }catch(e){
+      setStatus('Bağlantı yok · Ollama serve çalışıyor mu?');
+    }
+  }
+  async function talk(){
+    const prompt=input.value.trim();
+    if(!prompt||send.disabled)return;
+    input.value='';
+    addMessage(prompt,'user');
+    history.push({role:'user',content:prompt});
+    send.disabled=true;send.textContent='Düşünüyor…';
+    setStatus('Qwen yanıt hazırlıyor…');
+    const pending=addMessage('Yanıt hazırlanıyor…','bot');
+    try{
+      const response=await fetch(endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model,
+          messages:[
+            {role:'system',content:'Sen Flame in Freefall uzay yangını laboratuvarının yardımcı yapay zekâsısın. HER ZAMAN yalnızca Türkçe yaz ve konuş. Kullanıcı açıkça başka bir dil istemedikçe Çince, Japonca, İngilizce veya başka bir dilde tek bir kelime ya da karakter bile kullanma. Yanıtını Türkçe üret; başka alfabelere geçme. Bilimsel doğruluğa önem ver: emin olmadığın bilgiyi kesinmiş gibi sunma, yanlış öncülleri nazikçe düzelt. Örneğin alev nükleer bir yapı değildir; mikro yerçekiminde alevin daha yuvarlak görünmesinin temel nedeni doğal taşınımın zayıflaması ve oksijen/ısı aktarımının ağırlıklı olarak difüzyonla gerçekleşmesidir. Alevin biçimi yakıt, oksijen akışı ve çevre koşullarına da bağlıdır. Simülatör sonuçlarının eğitim amaçlı yaklaşık model olduğunu gerektiğinde belirt. Açık, anlaşılır ve doğal Türkçe kullan.'},
+            ...history
+          ],
+          stream:true
+        })
+      });
+      if(!response.ok){
+        const detail=await response.text();
+        throw new Error('Ollama HTTP '+response.status+' · '+detail.slice(0,240));
+      }
+      if(!response.body)throw new Error('Tarayıcı canlı yanıt akışını desteklemiyor.');
+      const reader=response.body.getReader();
+      const decoder=new TextDecoder();
+      let buffer='';
+      let answer='';
+      let finished=false;
+      while(!finished){
+        const {value,done}=await reader.read();
+        if(done)break;
+        buffer+=decoder.decode(value,{stream:true});
+        const lines=buffer.split('\n');
+        buffer=lines.pop()||'';
+        for(const line of lines){
+          if(!line.trim())continue;
+          const chunk=JSON.parse(line);
+          if(chunk.error)throw new Error(chunk.error);
+          const piece=chunk.message?.content||'';
+          if(piece){
+            answer+=piece;
+            pending.textContent=answer;
+            messages.scrollTop=messages.scrollHeight;
+          }
+          if(chunk.done)finished=true;
+        }
+      }
+      if(buffer.trim()){
+        const chunk=JSON.parse(buffer);
+        if(chunk.error)throw new Error(chunk.error);
+        const piece=chunk.message?.content||'';
+        if(piece){answer+=piece;pending.textContent=answer;}
+      }
+      if(!answer)answer='Model boş yanıt döndürdü.';
+      pending.textContent=answer;
+      history.push({role:'assistant',content:answer});
+      setStatus('Bağlandı · '+model,true);
+    }catch(err){
+      pending.remove();
+      history.pop();
+      addMessage('Bağlantı kurulamadı: '+err.message+'\n\nMX Linux terminalinde `ollama serve` komutunun çalıştığını ve tarayıcı erişimi için OLLAMA_ORIGINS ayarını kontrol et.','bot','error');
+      setStatus('Bağlantı hatası · Ollama ayarlarını kontrol et');
+    }finally{
+      send.disabled=false;send.textContent='Gönder ↗';input.focus();
+    }
+  }
+  send.addEventListener('click',talk);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();talk();}
+  });
+  checkConnection();
+})();
+
+</script>
+</body>
+</html>
+
